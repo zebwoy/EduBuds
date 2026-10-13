@@ -1,0 +1,5 @@
+# Hatchable project manifest. This file marks the folder as a
+# Hatchable project and declares the services it uses.
+# Reference: https://hatchable.com/docs/developers/config
+name = "EduBuds"
+description = "EduBuds is a structured Islamic Studies curriculum for Grades 1–9, with four modules per grade and carefully balanced learning across belief, action, du‘as, etiquettes, history and biographies, and tafseer."
