@@ -1,1 +1,0 @@
-CREATE TABLE newsletter_subscribers (id BIGSERIAL PRIMARY KEY, email TEXT NOT NULL UNIQUE, source TEXT NOT NULL DEFAULT 'website', created_at TIMESTAMP NOT NULL DEFAULT now());

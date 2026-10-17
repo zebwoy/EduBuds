@@ -1,0 +1,24 @@
+{
+  "name": "edubuds",
+  "version": "1.0.0",
+  "description": "EduBuds — Learn. Grow. Shine. A complete Islamic Studies programme for growing minds.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static site — no build step required'",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@clerk/backend": "^1.14.0",
+    "@neondatabase/serverless": "^0.9.5",
+    "@supabase/supabase-js": "^2.45.4",
+    "@vercel/blob": "^0.24.1"
+  },
+  "devDependencies": {
+    "vercel": "^37.0.0"
+  }
+}
