@@ -6,10 +6,47 @@
 'use strict';
 
 /* ── Config ─────────────────────────────────────────────
-   Replace with the real WhatsApp number (no +, no spaces)
-   e.g. "923211234567" for Pakistan +92 321 1234567
+   Loaded dynamically from CMS (/api/settings) with fallback
    ─────────────────────────────────────────────────────── */
-const WHATSAPP_NUMBER = '923001234567'; // ← REPLACE THIS
+let WHATSAPP_NUMBER = '919222315006';
+let CONTACT_EMAIL = 'support@edubuds.in';
+
+/* ── Remote Settings Loader ─────────────────────────────── */
+async function loadRemoteSettings() {
+  try {
+    const res = await fetch('/api/settings');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.whatsapp_number && String(data.whatsapp_number).trim()) {
+      WHATSAPP_NUMBER = String(data.whatsapp_number).replace(/\D/g, '');
+      // Update any rendered whatsapp buttons
+      document.querySelectorAll('a.btn-whatsapp').forEach(a => {
+        try {
+          const url = new URL(a.href, window.location.origin);
+          const textParam = url.searchParams.get('text');
+          if (textParam) {
+            a.href = buildWhatsAppURL(textParam);
+          }
+        } catch {
+          // ignore malformed URLs
+        }
+      });
+    }
+    if (data.contact_email) {
+      CONTACT_EMAIL = data.contact_email.trim();
+      document.querySelectorAll('a[href^="mailto:"]').forEach(a => {
+        a.href = `mailto:${CONTACT_EMAIL}`;
+        if (a.textContent.includes('@')) a.textContent = CONTACT_EMAIL;
+      });
+    }
+    if (data.site_title && !document.title.includes('404')) {
+      document.title = data.site_title;
+    }
+  } catch {
+    // Offline or static fallback — keeps running seamlessly
+  }
+}
+loadRemoteSettings();
 
 /* ── Utilities ──────────────────────────────────────────── */
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
@@ -25,9 +62,9 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 
 /* ── Theme Toggle ────────────────────────────────────────── */
 (function initTheme() {
-  const html     = document.documentElement;
-  const toggle   = $('#theme-toggle');
-  const STORAGE  = 'edubuds-theme';
+  const html = document.documentElement;
+  const toggle = $('#theme-toggle');
+  const STORAGE = 'edubuds-theme';
 
   const saved = localStorage.getItem(STORAGE);
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -139,14 +176,14 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
     const opacity = Math.random() * 0.35 + 0.15;
 
     Object.assign(p.style, {
-      width:  size + 'px',
+      width: size + 'px',
       height: size + 'px',
       background: color,
       left: (Math.random() * 90 + 5) + '%',
-      top:  (Math.random() * 85 + 5) + '%',
-      '--dur':   (Math.random() * 4 + 4) + 's',
+      top: (Math.random() * 85 + 5) + '%',
+      '--dur': (Math.random() * 4 + 4) + 's',
       '--delay': (Math.random() * 3) + 's',
-      '--op':    opacity,
+      '--op': opacity,
     });
 
     container.appendChild(p);
@@ -163,12 +200,12 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
   cards.forEach(card => {
     card.addEventListener('mousemove', (e) => {
       const rect = card.getBoundingClientRect();
-      const cx   = rect.left + rect.width / 2;
-      const cy   = rect.top  + rect.height / 2;
-      const dx   = (e.clientX - cx) / (rect.width / 2);
-      const dy   = (e.clientY - cy) / (rect.height / 2);
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = (e.clientX - cx) / (rect.width / 2);
+      const dy = (e.clientY - cy) / (rect.height / 2);
       const rotX = -dy * 6;
-      const rotY =  dx * 6;
+      const rotY = dx * 6;
 
       card.style.transform = `translateY(-6px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
     });
@@ -239,17 +276,34 @@ const PRODUCTS_DATA = {
 };
 
 (function initProducts() {
-  const tabsEl   = $('#filter-tabs');
-  const gridEl   = $('#products-grid');
-  const labelEl  = $('#series-label');
-  const dotEl    = $('#series-label-dot');
-  const textEl   = $('#series-label-text');
-  const descEl   = $('#series-label-desc');
+  const tabsEl = $('#filter-tabs');
+  const gridEl = $('#products-grid');
+  const labelEl = $('#series-label');
+  const dotEl = $('#series-label-dot');
+  const textEl = $('#series-label-text');
+  const descEl = $('#series-label-desc');
   if (!tabsEl || !gridEl) return;
 
-  const data   = PRODUCTS_DATA;
-  const { series } = data;
+  let series = PRODUCTS_DATA.series;
   let activeId = 'all';
+
+  async function syncProductsFromApi() {
+    try {
+      const res = await fetch('/api/products');
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json && Array.isArray(json.series) && json.series.length > 0) {
+        series = json.series;
+        renderTabs();
+        renderGrid();
+        applyFilter(activeId);
+        updateLabel(activeId);
+        $$('.book-card:not(.hidden)', gridEl).forEach(card => revealObserver.observe(card));
+      }
+    } catch {
+      // Offline fallback: series already rendered
+    }
+  }
 
   /* ── Render Filter Tabs ─────────────────────────────── */
   function renderTabs() {
@@ -269,7 +323,7 @@ const PRODUCTS_DATA = {
       const btn = document.createElement('button');
       btn.className = `filter-tab ${activeId === s.id ? 'active' : ''}`;
       btn.textContent = s.label;
-      btn.dataset.id  = s.id;
+      btn.dataset.id = s.id;
       btn.setAttribute('role', 'tab');
       btn.setAttribute('aria-selected', activeId === s.id ? 'true' : 'false');
       btn.addEventListener('click', () => setActive(s.id));
@@ -383,6 +437,8 @@ const PRODUCTS_DATA = {
   // Observe initial cards
   $$('.book-card', gridEl).forEach(card => revealObserver.observe(card));
 
+  // Background fetch live series & books from API/DB
+  syncProductsFromApi();
 })();
 
 /* ── Sprout animation trigger ─────────────────────────────── */
@@ -414,7 +470,7 @@ const PRODUCTS_DATA = {
 /* ── Newsletter form ──────────────────────────────────────── */
 (function initNewsletter() {
   const form = $('#subscribe-form');
-  const msg  = $('#form-message');
+  const msg = $('#form-message');
   if (!form || !msg) return;
 
   form.addEventListener('submit', async (e) => {
@@ -461,4 +517,183 @@ function whatsappIcon() {
   return `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
   </svg>`;
+}
+
+/* ── FAQs Accordion ───────────────────────────────────────── */
+(function initFaqs() {
+  const faqList = $('#faq-list');
+  if (!faqList) return;
+
+  function bindTriggers(container) {
+    const items = container.querySelectorAll('.faq-item');
+    items.forEach(item => {
+      const trigger = item.querySelector('.faq-trigger');
+      if (!trigger || trigger.dataset.bound) return;
+      trigger.dataset.bound = 'true';
+
+      trigger.addEventListener('click', () => {
+        const isOpen = item.classList.contains('active');
+
+        // Optional: close siblings for clean single-open accordion
+        items.forEach(sibling => {
+          if (sibling !== item) {
+            sibling.classList.remove('active');
+            const sibTrigger = sibling.querySelector('.faq-trigger');
+            if (sibTrigger) sibTrigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+
+        item.classList.toggle('active', !isOpen);
+        trigger.setAttribute('aria-expanded', String(!isOpen));
+      });
+    });
+  }
+
+  // Bind initial static items
+  bindTriggers(faqList);
+
+  // Background fetch live FAQs from /api/faqs
+  async function syncFaqsFromApi() {
+    try {
+      const res = await fetch('/api/faqs');
+      if (!res.ok) return;
+      const json = await res.json();
+      if (!json || !Array.isArray(json.faqs) || json.faqs.length === 0) return;
+
+      faqList.innerHTML = '';
+      json.faqs.forEach((faq, idx) => {
+        const article = document.createElement('article');
+        article.className = 'faq-item reveal';
+        article.innerHTML = `
+          <button class="faq-trigger" aria-expanded="false" aria-controls="faq-live-ans-${faq.id || idx}">
+            <span>${escapeHTML(faq.question)}</span>
+            <div class="faq-icon-wrap" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+          </button>
+          <div class="faq-panel" id="faq-live-ans-${faq.id || idx}">
+            <p>${escapeHTML(faq.answer)}</p>
+          </div>
+        `;
+        faqList.appendChild(article);
+      });
+
+      bindTriggers(faqList);
+    } catch {
+      // Offline fallback: static HTML FAQs remain active
+    }
+  }
+
+  syncFaqsFromApi();
+
+  // Wire FAQ CTA action buttons
+  const faqWaCta = $('#faq-wa-cta');
+  if (faqWaCta) {
+    faqWaCta.href = buildWhatsAppURL('Assalamu Alaikum! I have a question regarding the EduBuds curriculum and book orders.');
+  }
+  const faqMailCta = $('#faq-mail-cta');
+  if (faqMailCta) {
+    faqMailCta.href = `mailto:${CONTACT_EMAIL}`;
+  }
+})();
+
+/* ── Dynamic Site Content Hydration ───────────────────────── */
+async function syncContentFromApi() {
+  try {
+    const res = await fetch('/api/content');
+    if (!res.ok) return;
+    const json = await res.json();
+    if (!json || !json.content) return;
+    const c = json.content;
+
+    // 1. Marquee
+    if (c.marquee && Array.isArray(c.marquee.items) && c.marquee.items.length > 0) {
+      const track = document.querySelector('.topline-track');
+      if (track) {
+        // Double for seamless infinite css scroll
+        const duplicated = [...c.marquee.items, ...c.marquee.items];
+        track.innerHTML = duplicated.map(item => `<span class="topline-item">${item} <span class="dot"></span></span>`).join('');
+      }
+    }
+
+    // 2. Hero
+    if (c.hero) {
+      const heroH1 = document.querySelector('.hero-copy h1');
+      if (heroH1 && c.hero.heading) heroH1.innerHTML = c.hero.heading;
+      const heroP = document.querySelector('.hero-copy p');
+      if (heroP && c.hero.lead) heroP.textContent = c.hero.lead;
+      const heroEyebrow = document.querySelector('.hero-copy .eyebrow');
+      if (heroEyebrow && c.hero.eyebrow) {
+        heroEyebrow.innerHTML = `<span class="mark">✳</span> ${escapeHTML(c.hero.eyebrow)}`;
+      }
+      if (c.hero.trustPills && Array.isArray(c.hero.trustPills)) {
+        const trustWrap = document.querySelector('.hero-trust');
+        if (trustWrap) {
+          trustWrap.innerHTML = c.hero.trustPills
+            .map(p => `<span class="trust-pill"><span class="dot"></span> ${escapeHTML(p)}</span>`)
+            .join('');
+        }
+      }
+    }
+
+    // 3. Stats
+    if (c.stats) {
+      const statItems = document.querySelectorAll('.stats-bar .stat-item');
+      const statsKeys = [
+        { num: c.stats.stat1Num, label: c.stats.stat1Label },
+        { num: c.stats.stat2Num, label: c.stats.stat2Label },
+        { num: c.stats.stat3Num, label: c.stats.stat3Label },
+        { num: c.stats.stat4Num, label: c.stats.stat4Label },
+      ];
+      statItems.forEach((el, idx) => {
+        const pair = statsKeys[idx];
+        if (pair && pair.num !== undefined) {
+          const numEl = el.querySelector('.stat-num');
+          const labelEl = el.querySelector('.stat-label');
+          if (numEl) {
+            numEl.dataset.count = pair.num;
+            numEl.textContent = pair.num;
+          }
+          if (labelEl && pair.label) labelEl.textContent = pair.label;
+        }
+      });
+    }
+
+    // 4. Curriculum
+    if (c.curriculum) {
+      const curHead = document.querySelector('#curriculum-heading');
+      if (curHead && c.curriculum.heading) curHead.innerHTML = c.curriculum.heading;
+      const curLead = document.querySelector('#curriculum .section-head > p');
+      if (curLead && c.curriculum.lead) curLead.textContent = c.curriculum.lead;
+    }
+
+    // 5. Approach
+    if (c.approach) {
+      const appHead = document.querySelector('#approach-heading');
+      if (appHead && c.approach.heading) appHead.innerHTML = c.approach.heading;
+      const appLead = document.querySelector('.approach-copy > p');
+      if (appLead && c.approach.lead) appLead.textContent = c.approach.lead;
+    }
+
+    // 6. Parents
+    if (c.parents) {
+      const parHead = document.querySelector('#parents-heading');
+      if (parHead && c.parents.heading) parHead.innerHTML = c.parents.heading;
+      const parLead = document.querySelector('.parent-copy > p');
+      if (parLead && c.parents.lead) parLead.textContent = c.parents.lead;
+    }
+  } catch {
+    // Offline resilience: keep static HTML
+  }
+}
+syncContentFromApi();
+
+function escapeHTML(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

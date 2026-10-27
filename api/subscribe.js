@@ -3,7 +3,7 @@ import { insertSubscriber } from '../lib/db.js';
 /**
  * Vercel Serverless Function: POST /api/subscribe
  * Handles newsletter subscriptions with honeypot spam protection
- * and saves to Supabase or Neon PostgreSQL.
+ * and saves subscribers to Neon PostgreSQL.
  */
 export default async function handler(req, res) {
   // Only accept POST
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, error: 'Please enter a valid email address.' });
     }
 
-    // 3. Persist subscriber via DB adapter (Supabase or Neon)
+    // 3. Persist subscriber via Neon DB adapter
     await insertSubscriber(rawEmail, body.source || 'website');
 
     return res.status(200).json({
