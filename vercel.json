@@ -4,7 +4,9 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/admin", "destination": "/admin/index.html" },
-    { "source": "/admin/", "destination": "/admin/index.html" }
+    { "source": "/admin/", "destination": "/admin/index.html" },
+    { "source": "/api/newsletter", "destination": "/api/subscribe" },
+    { "source": "/api/cms/(.*)", "destination": "/api/cms?route=$1" }
   ],
   "headers": [
     {
