@@ -370,7 +370,7 @@ const PRODUCTS_DATA = {
 
     card.innerHTML = `
       <div class="book-card-cover">
-        <img src="${book.image}" alt="${book.title}${book.subtitle ? ' — ' + book.subtitle : ''}" loading="lazy">
+        <img src="${book.image}" alt="${book.title}${book.subtitle ? ' — ' + book.subtitle : ''}" loading="lazy" onerror="this.onerror=null;this.src='/assets/placeholder-cover.svg';">
         <span class="book-series-badge" style="background:${series.color}">${series.label}</span>
       </div>
       <div class="book-card-body">

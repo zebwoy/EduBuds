@@ -714,7 +714,7 @@ function renderBooksGrid() {
 
     card.innerHTML = `
       <div class="book-admin-header">
-        <img class="book-admin-cover" src="${escapeHtml(book.image || '/assets/Resource/Grade 1 Cover.jpg')}" alt="${escapeHtml(book.title)}" loading="lazy" onerror="this.src='/assets/Resource/Grade 1 Cover.jpg'">
+        <img class="book-admin-cover" src="${escapeHtml(book.image || '/assets/placeholder-cover.svg')}" alt="${escapeHtml(book.title)}" loading="lazy" onerror="this.src='/assets/placeholder-cover.svg'">
         <div class="book-admin-meta">
           <span class="book-series-pill" style="background:${seriesColor}">${escapeHtml(seriesLabel)}</span>
           <h4 class="book-admin-title" title="${escapeHtml(book.title)}">${escapeHtml(book.title)}</h4>
@@ -830,8 +830,8 @@ function openBookModal(mode = 'create', bookId = null) {
     document.getElementById('book-modal-sub').textContent = 'Add a curriculum title to your public catalogue.';
     bookFieldPublished.checked = true;
     bookFieldOrder.value = state.books.length + 1;
-    bookFieldImage.value = '/assets/Resource/39 Grade 1.png';
-    updateCoverPreview('/assets/Resource/39 Grade 1.png');
+    bookFieldImage.value = '/assets/placeholder-cover.svg';
+    updateCoverPreview('/assets/placeholder-cover.svg');
 
     if (state.activeSeriesFilter !== 'all') {
       bookFieldSeries.value = state.activeSeriesFilter;
@@ -864,7 +864,7 @@ function openBookModal(mode = 'create', bookId = null) {
 
 function updateCoverPreview(url) {
   if (!bookCoverPreview) return;
-  bookCoverPreview.src = url || '/assets/Resource/Grade 1 Cover.jpg';
+  bookCoverPreview.src = url || '/assets/placeholder-cover.svg';
 }
 
 if (bookFieldImage) {
@@ -1177,7 +1177,7 @@ function renderMediaGallery() {
     card.className = 'media-card';
     card.innerHTML = `
       <div class="media-thumb-wrap">
-        <img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.src='/assets/Resource/Grade 1 Cover.jpg'">
+        <img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.src='/assets/placeholder-cover.svg'">
       </div>
       <div class="media-card-details">
         <span class="media-badge-tag ${item.isBlob ? 'blob' : ''}">${escapeHtml(item.category)}</span>
