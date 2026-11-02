@@ -1765,6 +1765,127 @@ body.cms-body {
   color: var(--text-dim);
 }
 
+.upload-metric-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+.upload-metric-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.upload-validation-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.825rem;
+  line-height: 1.45;
+  transition: all var(--transition-normal);
+}
+.upload-validation-banner.validation-optimal {
+  background: rgba(39, 148, 71, 0.12);
+  border: 1px solid rgba(39, 148, 71, 0.35);
+  color: #86efac;
+}
+.upload-validation-banner.validation-warning {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fde047;
+}
+.upload-validation-banner.validation-danger {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+.validation-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+.validation-optimal .validation-icon {
+  background: rgba(39, 148, 71, 0.25);
+  color: #4ade80;
+}
+.validation-warning .validation-icon {
+  background: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+}
+.validation-danger .validation-icon {
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+}
+.validation-content {
+  flex: 1;
+}
+.validation-status-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 2px;
+}
+.validation-status-desc {
+  font-size: 0.775rem;
+  opacity: 0.95;
+}
+.designer-tip-card {
+  padding: 12px 14px;
+  background: rgba(8, 120, 201, 0.08);
+  border: 1px solid rgba(8, 120, 201, 0.2);
+  border-radius: var(--radius-md);
+  font-size: 0.775rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.designer-tip-card .tip-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #60a5fa;
+  margin-bottom: 4px;
+}
+.designer-tip-card strong {
+  color: var(--text-main);
+}
+.upload-override-row {
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px dashed rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-md);
+}
+.upload-override-row .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.775rem;
+  color: #fca5a5;
+  cursor: pointer;
+}
+.upload-override-row input[type="checkbox"] {
+  accent-color: var(--brand-red);
+  cursor: pointer;
+  width: 15px;
+  height: 15px;
+}
+
 /* ── Media Picker Modal ─────────────────────────────────────── */
 .picker-modal-body {
   padding: 24px 28px 28px;

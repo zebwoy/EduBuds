@@ -1105,7 +1105,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
             </div>
             <h4>Drag & drop image here, or <span>browse</span></h4>
-            <p>Supports PNG, JPG, WebP, or SVG up to 10MB</p>
+            <p>Recommended: WebP or JPG · Max 1200px width · Under 800 KB</p>
           </div>
         </div>
 
@@ -1114,9 +1114,36 @@
             <img id="upload-preview-img" src="" alt="Selected image preview">
             <div class="upload-preview-meta">
               <strong id="upload-preview-name">filename.png</strong>
-              <span id="upload-preview-size">1.2 MB</span>
+              <div class="upload-metric-chips">
+                <span class="upload-metric-chip" id="upload-preview-size">-- KB</span>
+                <span class="upload-metric-chip" id="upload-preview-dims">-- × -- px</span>
+                <span class="upload-metric-chip" id="upload-preview-format">IMAGE</span>
+              </div>
             </div>
             <button type="button" id="upload-remove-file-btn" class="btn-subtle btn-sm">Change</button>
+          </div>
+
+          <!-- Web Optimization Health Check Feedback -->
+          <div id="upload-validation-banner" class="upload-validation-banner validation-optimal">
+            <div class="validation-icon" id="upload-validation-icon">✓</div>
+            <div class="validation-content">
+              <div class="validation-status-title" id="upload-validation-title">Checking image...</div>
+              <div class="validation-status-desc" id="upload-validation-desc">Analyzing dimensions and file weight for web performance.</div>
+            </div>
+          </div>
+
+          <!-- Designer Export Guidance -->
+          <div class="designer-tip-card">
+            <div class="tip-badge">💡 Designer Specs (Illustrator / CorelDraw)</div>
+            <p>Target <strong>800–1200px width</strong> and export as <strong>WebP</strong> or <strong>JPG (80–85%)</strong>. For logos/transparency, use <strong>WebP</strong> or optimized <strong>PNG</strong>.</p>
+          </div>
+
+          <!-- Optional Override for Admins -->
+          <div id="upload-override-row" class="upload-override-row hidden">
+            <label class="checkbox-label">
+              <input type="checkbox" id="upload-override-checkbox">
+              <span>I understand this image is oversized and may slow down page loading; upload anyway</span>
+            </label>
           </div>
         </div>
 

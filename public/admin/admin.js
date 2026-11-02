@@ -129,6 +129,14 @@ const uploadPreviewSize = document.getElementById('upload-preview-size');
 const uploadRemoveFileBtn = document.getElementById('upload-remove-file-btn');
 const startUploadBtn = document.getElementById('start-upload-btn');
 const blobWarningBanner = document.getElementById('blob-warning-banner');
+const uploadPreviewDims = document.getElementById('upload-preview-dims');
+const uploadPreviewFormat = document.getElementById('upload-preview-format');
+const uploadValidationBanner = document.getElementById('upload-validation-banner');
+const uploadValidationIcon = document.getElementById('upload-validation-icon');
+const uploadValidationTitle = document.getElementById('upload-validation-title');
+const uploadValidationDesc = document.getElementById('upload-validation-desc');
+const uploadOverrideRow = document.getElementById('upload-override-row');
+const uploadOverrideCheckbox = document.getElementById('upload-override-checkbox');
 
 // Media Picker Modal DOM Elements
 const mediaPickerModal = document.getElementById('media-picker-modal');
