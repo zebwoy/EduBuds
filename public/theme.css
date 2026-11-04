@@ -1,10 +1,10 @@
-/* ═══════════════════════════════════════════════════════
+﻿/* ═══════════════════════════════════════════════════════
    EduBuds — Design System
    Learn · Grow · Shine
    ═══════════════════════════════════════════════════════ */
 
 /* ── Google Fonts ─────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap&font-display=swap');
 
 /* ── Design Tokens — Light Mode ───────────────────────── */
 :root {
@@ -128,7 +128,7 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 88px;
+  scroll-padding-top: 116px;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -1886,3 +1886,276 @@ footer {
   .reveal { opacity: 1; transform: none; }
   .topline-track { animation: none; }
 }
+/* ══════════════════════════════════════════
+   PREMIUM REDESIGN ADDITIONS
+   ══════════════════════════════════════════ */
+
+/* ── Topline Dismiss Button ───────────────────────────── */
+.topline {
+  position: relative;
+}
+
+.topline-dismiss {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.65);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.topline-dismiss:hover {
+  background: rgba(255,255,255,0.22);
+  color: #fff;
+}
+
+.topline.dismissed {
+  display: none;
+}
+
+/* ── Float Card Icon (replaces placeholder image) ─────── */
+.fc-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-sm);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+/* ── Stat Numbers — color-coded ───────────────────────── */
+.stat-item:nth-child(1) .stat-num { color: var(--blue); }
+.stat-item:nth-child(2) .stat-num { color: var(--green); }
+.stat-item:nth-child(3) .stat-num { color: var(--pink); }
+.stat-item:nth-child(4) .stat-num { color: var(--navy); }
+
+[data-theme="dark"] .stat-item:nth-child(4) .stat-num { color: var(--yellow); }
+
+/* Stats bar — gradient accent top line */
+.stats-bar {
+  position: relative;
+}
+.stats-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 6%;
+  right: 6%;
+  height: 3px;
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
+  background: linear-gradient(90deg, var(--blue), var(--green), var(--yellow), var(--pink));
+  opacity: 0.6;
+}
+
+/* ── Parent Cards — left accent border on hover ───────── */
+.parent-card {
+  border-left: 3px solid transparent;
+  transition: all 0.3s var(--ease-spring), border-left-color 0.3s;
+}
+
+.parent-card:hover {
+  border-left-color: var(--green);
+  transform: translateX(4px);
+}
+
+/* ── Premium Footer ───────────────────────────────────── */
+footer.site-footer {
+  padding: 56px 6% 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: var(--gap-xl);
+  transition: background 0.4s, border-color 0.4s;
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.footer-brand .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-brand .brand-logo { width: 44px; height: 44px; }
+.footer-brand .brand-text b { font-size: 18px; }
+
+.footer-tagline {
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--muted);
+  max-width: 280px;
+  margin: 0;
+}
+
+.footer-social {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.social-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-sm);
+  display: grid;
+  place-items: center;
+  transition: all 0.25s var(--ease-spring);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: var(--bg-subtle);
+}
+
+.social-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.social-btn.social-wa:hover {
+  background: #25D366;
+  border-color: #25D366;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(37,211,102,0.30);
+}
+
+.social-btn.social-ig:hover {
+  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  border-color: #e6683c;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(220,39,67,0.30);
+}
+
+.social-btn.social-mail:hover {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+  box-shadow: var(--shadow-glow-blue);
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.footer-col-title {
+  font: 700 11px/1 var(--display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+  margin: 0;
+}
+
+.footer-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-links a {
+  font-size: 13px;
+  color: var(--muted);
+  transition: color 0.2s, padding-left 0.2s;
+  display: inline-block;
+}
+
+.footer-links a:hover {
+  color: var(--navy);
+  padding-left: 4px;
+}
+
+[data-theme="dark"] .footer-links a:hover { color: var(--ink); }
+
+.footer-bottom {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.footer-bottom-tagline {
+  font-style: italic;
+  opacity: 0.75;
+}
+
+/* ── Newsletter form — focus ring polish ──────────────── */
+.nl-input:focus {
+  box-shadow: 0 0 0 3px rgba(255,194,14,0.18);
+}
+
+[data-theme="dark"] .nl-input:focus {
+  box-shadow: 0 0 0 3px rgba(8,120,201,0.22);
+}
+
+/* ── Book Card — shimmer skeleton ─────────────────────── */
+.book-card.loading .book-card-cover {
+  background: linear-gradient(90deg, var(--border) 25%, var(--bg-subtle) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Responsive — Premium Footer ─────────────────────── */
+@media (max-width: 900px) {
+  footer.site-footer {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap-lg);
+    padding: 48px 5% 0;
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  footer.site-footer {
+    grid-template-columns: 1fr;
+    gap: var(--gap-md);
+    padding: 40px 5% 0;
+  }
+
+  .footer-brand {
+    grid-column: auto;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
+
+/* ── Topline hidden state ──────────────────────────────── */
+body.topline-hidden .topline { display: none; }
+body.topline-hidden { --topline-h: 0px; }

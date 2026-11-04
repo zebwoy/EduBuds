@@ -1,4 +1,4 @@
-/* ═══════════════════════════════════════════════════════
+﻿/* ═══════════════════════════════════════════════════════
    EduBuds — script.js
    Learn · Grow · Shine
    ═══════════════════════════════════════════════════════ */
@@ -52,6 +52,14 @@ loadRemoteSettings();
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
 const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
 
+function debounce(fn, ms = 150) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), ms);
+  };
+}
+
 function buildWhatsAppURL(message) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
@@ -59,6 +67,23 @@ function buildWhatsAppURL(message) {
 /* ── Year ────────────────────────────────────────────────── */
 const yearEl = $('#year');
 if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+/* ── Topline Dismiss ─────────────────────────────────────── */
+(function initToplineDismiss() {
+  const topline = $('#topline');
+  const btn = $('#topline-dismiss');
+  if (!topline || !btn) return;
+
+  // Keep dismissed state within session
+  if (sessionStorage.getItem('topline-dismissed')) {
+    topline.classList.add('dismissed');
+  }
+
+  btn.addEventListener('click', () => {
+    topline.classList.add('dismissed');
+    sessionStorage.setItem('topline-dismissed', '1');
+  });
+})();
 
 /* ── Theme Toggle ────────────────────────────────────────── */
 (function initTheme() {
@@ -531,7 +556,7 @@ function whatsappIcon() {
       if (!trigger || trigger.dataset.bound) return;
       trigger.dataset.bound = 'true';
 
-      trigger.addEventListener('click', () => {
+      const handleFaqToggle = () => {
         const isOpen = item.classList.contains('active');
 
         // Optional: close siblings for clean single-open accordion
@@ -545,6 +570,14 @@ function whatsappIcon() {
 
         item.classList.toggle('active', !isOpen);
         trigger.setAttribute('aria-expanded', String(!isOpen));
+      };
+
+      trigger.addEventListener('click', handleFaqToggle);
+      trigger.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleFaqToggle();
+        }
       });
     });
   }
