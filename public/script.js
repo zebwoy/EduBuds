@@ -117,20 +117,18 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 })();
 
 /* ── Scroll Reveal ───────────────────────────────────────── */
+// Global reveal observer — available to all dynamic sections
+const globalRevealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      globalRevealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
 (function initReveal() {
-  const els = $$('.reveal');
-  if (!els.length) return;
-
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        io.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-
-  els.forEach(el => io.observe(el));
+  $$('.reveal').forEach(el => globalRevealObserver.observe(el));
 })();
 
 /* ── Animated Counter ────────────────────────────────────── */
@@ -306,6 +304,8 @@ const PRODUCTS_DATA = {
         applyFilter(activeId);
         updateLabel(activeId);
         $$('.book-card:not(.hidden)', gridEl).forEach(card => revealObserver.observe(card));
+        // Cascade series data to rest of page
+        updatePageFromSeries(series);
       }
     } catch {
       // Offline fallback: series already rendered
@@ -594,6 +594,11 @@ function whatsappIcon() {
       });
 
       bindTriggers(faqList);
+      // Re-observe new items for reveal animation
+      faqList.querySelectorAll('.faq-item.reveal').forEach(el => {
+        el.classList.remove('visible');
+        globalRevealObserver.observe(el);
+      });
     } catch {
       // Offline fallback: static HTML FAQs remain active
     }
@@ -702,6 +707,86 @@ async function syncContentFromApi() {
   }
 }
 syncContentFromApi();
+
+/* -- Dynamic Page Cascade from Series Data ---------------------------
+   Called after products are fetched from the API.
+   Updates every section that depends on how many series / books exist.
+   ------------------------------------------------------------------- */
+function updatePageFromSeries(seriesData) {
+  if (!seriesData || !Array.isArray(seriesData) || seriesData.length === 0) return;
+
+  const totalSeries  = seriesData.length;
+  const totalBooks   = seriesData.reduce((sum, s) => sum + (s.books ? s.books.length : 0), 0);
+
+  /* 1 — Stats bar: update "Book series" count ---------------------- */
+  const statItems = $$('.stats-bar .stat-item');
+  if (statItems[1]) {
+    const numEl = statItems[1].querySelector('.stat-num');
+    const labEl = statItems[1].querySelector('.stat-label');
+    if (numEl) {
+      numEl.dataset.count = totalSeries;
+      numEl.textContent   = totalSeries;
+    }
+    if (labEl) labEl.textContent = totalSeries === 1 ? 'Book series' : 'Book series';
+  }
+  // Update total books count in stat 3 slot if it exists
+  if (statItems[2]) {
+    const numEl = statItems[2].querySelector('.stat-num');
+    if (numEl && parseInt(numEl.dataset.count, 10) !== totalBooks) {
+      numEl.dataset.count = totalBooks;
+    }
+  }
+
+  /* 2 — Trust pills: update series count pill --------------------- */
+  const trustPills = $$('.hero-trust .trust-pill');
+  trustPills.forEach(pill => {
+    const text = pill.textContent.trim();
+    if (/SERIES/i.test(text)) {
+      const dot = pill.querySelector('.dot');
+      pill.textContent = '';
+      if (dot) pill.appendChild(dot);
+      pill.append(' ' + totalSeries + ' SERIES');
+    }
+  });
+
+  /* 3 — Topline marquee: inject series names ---------------------- */
+  const track = document.querySelector('.topline-track');
+  if (track) {
+    const seriesNames = seriesData.map(s => s.label).join(' \u00b7 ');
+    const items = [
+      '\u2736 \u00a0 A complete Islamic Studies programme for growing minds',
+      'Grades 1\u20139 \u00a0\u2022\u00a0 ' + totalSeries + ' Series \u00a0\u2022\u00a0 One connected journey',
+      seriesNames,
+      'Knowledge \u00b7 Practice \u00b7 Character',
+    ];
+    // Double for seamless loop
+    const doubled = [...items, ...items];
+    track.innerHTML = doubled
+      .map(t => '<span class="topline-item">' + t + ' <span class="dot"></span></span>')
+      .join('');
+  }
+
+  /* 4 — Hero float cards: reflect first 2 series dynamically ------ */
+  const floatCards = $$('.float-card');
+  const iconMap = {
+    default0: { emoji: '\ud83d\udcd6', label: 'series' },  // book emoji
+    default1: { emoji: '\ud83c\udf19', label: 'series' },  // moon emoji
+    default2: { emoji: '\u2728', label: 'series' },        // sparkle
+  };
+  seriesData.slice(0, floatCards.length).forEach((s, i) => {
+    const card = floatCards[i];
+    if (!card) return;
+    const iconEl  = card.querySelector('.fc-icon');
+    const titleEl = card.querySelector('div > div:first-child');
+    const subEl   = card.querySelector('.fc-sub');
+    if (iconEl) {
+      iconEl.style.background = s.colorLight || 'var(--blue-light)';
+      iconEl.style.color      = s.color || 'var(--blue)';
+    }
+    if (titleEl) titleEl.textContent = s.label;
+    if (subEl)   subEl.textContent   = s.tagline || (s.books ? s.books.length + ' books' : '');
+  });
+}
 
 function escapeHTML(str) {
   if (!str) return '';
