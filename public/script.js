@@ -444,6 +444,18 @@ const PRODUCTS_DATA = {
   // Observe initial cards
   $$('.book-card', gridEl).forEach(card => revealObserver.observe(card));
 
+  // Expose global series switcher for hero float cards & navigation
+  window.selectSeries = function(id) {
+    setActive(id);
+    const booksEl = document.getElementById('books');
+    if (booksEl) {
+      booksEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Immediate render from built-in series data (stats, trust pills, marquee, float cards)
+  updatePageFromSeries(series);
+
   // Background fetch live series & books from API/DB
   syncProductsFromApi();
 })();
@@ -766,26 +778,114 @@ function updatePageFromSeries(seriesData) {
       .join('');
   }
 
-  /* 4 — Hero float cards: reflect first 2 series dynamically ------ */
-  const floatCards = $$('.float-card');
-  const iconMap = {
-    default0: { emoji: '\ud83d\udcd6', label: 'series' },  // book emoji
-    default1: { emoji: '\ud83c\udf19', label: 'series' },  // moon emoji
-    default2: { emoji: '\u2728', label: 'series' },        // sparkle
-  };
-  seriesData.slice(0, floatCards.length).forEach((s, i) => {
-    const card = floatCards[i];
-    if (!card) return;
-    const iconEl  = card.querySelector('.fc-icon');
-    const titleEl = card.querySelector('div > div:first-child');
-    const subEl   = card.querySelector('.fc-sub');
-    if (iconEl) {
-      iconEl.style.background = s.colorLight || 'var(--blue-light)';
-      iconEl.style.color      = s.color || 'var(--blue)';
+  /* 4 — Hero float cards: dynamically render ALL series around hero logo */
+  renderHeroFloatCards(seriesData);
+}
+
+let floatRotateTimer = null;
+
+function renderHeroFloatCards(seriesData) {
+  const container = document.getElementById('hero-float-cards');
+  if (!container) return;
+
+  if (floatRotateTimer) {
+    clearInterval(floatRotateTimer);
+    floatRotateTimer = null;
+  }
+
+  const positions = ['float-card-1', 'float-card-2', 'float-card-3', 'float-card-4'];
+
+  function getSeriesIcon(s, idx) {
+    const text = ((s.id || '') + ' ' + (s.label || '')).toLowerCase();
+    if (text.includes('prophet')) return '🌙';
+    if (text.includes('hadith'))  return '✨';
+    if (text.includes('quran') || text.includes('studies')) return '📖';
+    if (text.includes('arabic')) return '✍️';
+    if (text.includes('dua'))    return '🤲';
+    const defaults = ['📖', '🌙', '✨', '🌟', '📚', '🕌', '🌿'];
+    return defaults[idx % defaults.length];
+  }
+
+  function cleanSub(s) {
+    if (s.books && s.books.length > 0) {
+      const bCount = s.books.length === 1 ? '1 book' : `${s.books.length} books`;
+      if (s.tagline) {
+        const shortTag = s.tagline.split('—')[0].trim();
+        return shortTag.length < 24 ? `${shortTag} · ${bCount}` : bCount;
+      }
+      return bCount;
     }
-    if (titleEl) titleEl.textContent = s.label;
-    if (subEl)   subEl.textContent   = s.tagline || (s.books ? s.books.length + ' books' : '');
-  });
+    if (s.tagline) {
+      return s.tagline.split('—')[0].trim();
+    }
+    return 'Curriculum Series';
+  }
+
+  function createCard(s, slotIdx) {
+    const card = document.createElement('div');
+    card.className = `float-card ${positions[slotIdx] || 'float-card-1'}`;
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('title', `Explore ${s.label}`);
+    card.setAttribute('aria-label', `Explore ${s.label}`);
+    card.dataset.series = s.id;
+
+    const icon = getSeriesIcon(s, slotIdx);
+    const subText = cleanSub(s);
+    const accentColor = s.color || 'var(--blue)';
+    const accentLight = s.colorLight || 'var(--blue-light)';
+
+    card.innerHTML = `
+      <div class="fc-icon" style="background:${accentLight};color:${accentColor}">${icon}</div>
+      <div class="fc-content">
+        <div class="fc-title">${escapeHTML(s.label)}</div>
+        <div class="fc-sub">${escapeHTML(subText)}</div>
+      </div>
+    `;
+
+    // Click & keyboard activation: filter catalog and scroll smoothly
+    const handleActivate = () => {
+      if (typeof window.selectSeries === 'function') {
+        window.selectSeries(s.id);
+      } else {
+        const target = document.querySelector('#books');
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+
+    card.addEventListener('click', handleActivate);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleActivate();
+      }
+    });
+
+    return card;
+  }
+
+  // If 4 or fewer series: show all of them simultaneously in orbital positions
+  if (seriesData.length <= 4) {
+    container.innerHTML = '';
+    seriesData.forEach((s, idx) => {
+      container.appendChild(createCard(s, idx));
+    });
+    return;
+  }
+
+  // If > 4 series: display 3 active slots and smoothly rotate through the series list every 5s
+  let offset = 0;
+  function updateSlots() {
+    container.innerHTML = '';
+    for (let slot = 0; slot < 3; slot++) {
+      const sIdx = (offset + slot) % seriesData.length;
+      container.appendChild(createCard(seriesData[sIdx], slot));
+    }
+    offset = (offset + 1) % seriesData.length;
+  }
+
+  updateSlots();
+  floatRotateTimer = setInterval(updateSlots, 5000);
 }
 
 function escapeHTML(str) {
