@@ -1886,48 +1886,16 @@ footer {
   .reveal { opacity: 1; transform: none; }
   .topline-track { animation: none; }
 }
+
 /* ══════════════════════════════════════════
    PREMIUM REDESIGN ADDITIONS
    ══════════════════════════════════════════ */
-
-/* ── Topline Dismiss Button ───────────────────────────── */
-.topline {
-  position: relative;
-}
-
-.topline-dismiss {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255,255,255,0.65);
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  flex-shrink: 0;
-  line-height: 1;
-}
-
-.topline-dismiss:hover {
-  background: rgba(255,255,255,0.22);
-  color: #fff;
-}
-
-.topline.dismissed {
-  display: none;
-}
 
 /* ── Float Card Icon (replaces placeholder image) ─────── */
 .fc-icon {
   width: 40px;
   height: 40px;
+  min-width: 40px;
   border-radius: var(--r-sm);
   display: grid;
   place-items: center;
@@ -1940,13 +1908,10 @@ footer {
 .stat-item:nth-child(2) .stat-num { color: var(--green); }
 .stat-item:nth-child(3) .stat-num { color: var(--pink); }
 .stat-item:nth-child(4) .stat-num { color: var(--navy); }
-
 [data-theme="dark"] .stat-item:nth-child(4) .stat-num { color: var(--yellow); }
 
 /* Stats bar — gradient accent top line */
-.stats-bar {
-  position: relative;
-}
+.stats-bar { position: relative; }
 .stats-bar::before {
   content: '';
   position: absolute;
@@ -1962,15 +1927,30 @@ footer {
 /* ── Parent Cards — left accent border on hover ───────── */
 .parent-card {
   border-left: 3px solid transparent;
-  transition: all 0.3s var(--ease-spring), border-left-color 0.3s;
 }
-
 .parent-card:hover {
   border-left-color: var(--green);
   transform: translateX(4px);
 }
 
-/* ── Premium Footer ───────────────────────────────────── */
+/* ── Newsletter form — focus ring polish ──────────────── */
+.nl-input:focus { box-shadow: 0 0 0 3px rgba(255,194,14,0.18); }
+[data-theme="dark"] .nl-input:focus { box-shadow: 0 0 0 3px rgba(8,120,201,0.22); }
+
+/* ── Book Card — shimmer skeleton ─────────────────────── */
+.book-card.loading .book-card-cover {
+  background: linear-gradient(90deg, var(--border) 25%, var(--bg-subtle) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ══════════════════════════════════════════
+   PREMIUM FOOTER
+   ══════════════════════════════════════════ */
 footer.site-footer {
   padding: 56px 6% 0;
   background: var(--surface);
@@ -2022,31 +2002,10 @@ footer.site-footer {
   background: var(--bg-subtle);
 }
 
-.social-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-}
-
-.social-btn.social-wa:hover {
-  background: #25D366;
-  border-color: #25D366;
-  color: #fff;
-  box-shadow: 0 8px 20px rgba(37,211,102,0.30);
-}
-
-.social-btn.social-ig:hover {
-  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-  border-color: #e6683c;
-  color: #fff;
-  box-shadow: 0 8px 20px rgba(220,39,67,0.30);
-}
-
-.social-btn.social-mail:hover {
-  background: var(--blue);
-  border-color: var(--blue);
-  color: #fff;
-  box-shadow: var(--shadow-glow-blue);
-}
+.social-btn:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.social-btn.social-wa:hover { background: #25D366; border-color: #25D366; color: #fff; box-shadow: 0 8px 20px rgba(37,211,102,0.30); }
+.social-btn.social-ig:hover { background: linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); border-color: #e6683c; color: #fff; box-shadow: 0 8px 20px rgba(220,39,67,0.30); }
+.social-btn.social-mail:hover { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: var(--shadow-glow-blue); }
 
 .footer-col {
   display: flex;
@@ -2078,11 +2037,7 @@ footer.site-footer {
   display: inline-block;
 }
 
-.footer-links a:hover {
-  color: var(--navy);
-  padding-left: 4px;
-}
-
+.footer-links a:hover { color: var(--navy); padding-left: 4px; }
 [data-theme="dark"] .footer-links a:hover { color: var(--ink); }
 
 .footer-bottom {
@@ -2099,63 +2054,161 @@ footer.site-footer {
   flex-wrap: wrap;
 }
 
-.footer-bottom-tagline {
-  font-style: italic;
-  opacity: 0.75;
-}
+.footer-bottom-tagline { font-style: italic; opacity: 0.75; }
 
-/* ── Newsletter form — focus ring polish ──────────────── */
-.nl-input:focus {
-  box-shadow: 0 0 0 3px rgba(255,194,14,0.18);
-}
+/* ══════════════════════════════════════════
+   MOBILE RESPONSIVENESS — COMPREHENSIVE
+   ══════════════════════════════════════════ */
 
-[data-theme="dark"] .nl-input:focus {
-  box-shadow: 0 0 0 3px rgba(8,120,201,0.22);
-}
-
-/* ── Book Card — shimmer skeleton ─────────────────────── */
-.book-card.loading .book-card-cover {
-  background: linear-gradient(90deg, var(--border) 25%, var(--bg-subtle) 50%, var(--border) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* ── Responsive — Premium Footer ─────────────────────── */
+/* ── 900px: Tablet & Mobile ───────────────────────────── */
 @media (max-width: 900px) {
+
+  /* Header: hide the in-header "Explore Books" CTA button — it's redundant on mobile */
+  .header-actions .btn { display: none; }
+
+  /* Tighten header padding, reduce logo size */
+  .header { height: 68px; padding: 0 4%; gap: 12px; }
+  .nav.open { top: 68px; }
+  .brand-logo { width: 42px; height: 42px; }
+  .brand-text b { font-size: 18px; }
+
+  /* Ensure brand doesn't overflow */
+  .brand { min-width: 0; overflow: hidden; }
+  .brand-text { overflow: hidden; }
+
+  /* Hero — single column, centered */
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: 44px 5% 56px;
+    text-align: center;
+  }
+
+  .hero-copy p { margin: 0 auto; max-width: 480px; }
+  .hero-actions { justify-content: center; }
+
+  /* Trust pills — wrap and center gracefully */
+  .hero-trust {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* Hero visual — cap size, center, no overflow */
+  .hero-visual {
+    margin: 36px auto 0;
+    max-width: 300px;
+    width: 100%;
+  }
+
+  .hero-logo-wrap {
+    max-width: 300px;
+  }
+
+  /* Float cards stay tucked in on tablet */
+  .float-card-1 { right: 0%; top: 4%; }
+  .float-card-2 { left: 0%; bottom: 10%; }
+
+  /* Stats — 2 columns */
+  .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  .stat-item:nth-child(2) { border-right: none; }
+  .stat-item:nth-child(3) { border-right: 1px solid var(--border); border-top: 1px solid var(--border); }
+  .stat-item:nth-child(4) { border-top: 1px solid var(--border); }
+
+  /* Section head — single column */
+  .section-head { grid-template-columns: 1fr; gap: 20px; }
+  .section-head .series-label-desc { text-align: left; }
+
+  /* Curriculum strand grid — 2 columns */
+  .strand-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Approach — stack vertically */
+  .approach { grid-template-columns: 1fr; gap: 48px; }
+  .approach-art { height: 280px; order: 2; }
+
+  /* Parents — single column */
+  .parents { grid-template-columns: 1fr; }
+
+  /* Newsletter — single column */
+  .newsletter { grid-template-columns: 1fr; gap: 36px; }
+
+  /* Footer — 2 column */
   footer.site-footer {
     grid-template-columns: 1fr 1fr;
     gap: var(--gap-lg);
     padding: 48px 5% 0;
   }
-
-  .footer-brand {
-    grid-column: 1 / -1;
-  }
+  .footer-brand { grid-column: 1 / -1; }
 }
 
+/* ── 640px: Mobile ────────────────────────────────────── */
 @media (max-width: 640px) {
+  .section { padding: 56px 5%; }
+
+  /* Hero */
+  .hero { padding: 36px 5% 48px; }
+
+  /* Hero heading size */
+  h1 { font-size: clamp(38px, 10vw, 56px); }
+
+  /* Trust pills on small mobile — ensure row wraps nicely */
+  .hero-trust { gap: 8px; justify-content: center; }
+  .trust-pill { font-size: 8px; padding: 5px 12px; }
+
+  /* Hero visual — smaller circle on mobile */
+  .hero-visual {
+    max-width: 240px;
+    margin: 28px auto 0;
+  }
+
+  /* Float cards hidden on small mobile (too cramped) */
+  .float-card { display: none; }
+
+  /* Products — 2 column tight grid */
+  .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+  /* Strand grid — single column */
+  .strand-grid { grid-template-columns: 1fr; }
+
+  /* Grade journey — stack vertically */
+  .grade-journey {
+    flex-direction: column;
+    padding: 24px 22px;
+    gap: var(--gap-md);
+    text-align: center;
+  }
+  .grade-orbs { justify-content: center; }
+
+  /* Approach orbit sizes */
+  .approach-orbit { width: 220px; height: 220px; }
+  .approach-orbit-2 { width: 160px; height: 160px; }
+
+  /* Newsletter form — single column */
+  .form-row { grid-template-columns: 1fr; }
+  .nl-submit { height: 48px; width: 100%; }
+
+  /* Footer — single column */
   footer.site-footer {
     grid-template-columns: 1fr;
     gap: var(--gap-md);
     padding: 40px 5% 0;
   }
-
-  .footer-brand {
-    grid-column: auto;
-  }
-
-  .footer-bottom {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
+  .footer-brand { grid-column: auto; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; gap: 6px; }
 }
 
-/* ── Topline hidden state ──────────────────────────────── */
-body.topline-hidden .topline { display: none; }
-body.topline-hidden { --topline-h: 0px; }
+/* ── 400px: Small phones (iPhone SE, Galaxy A) ────────── */
+@media (max-width: 400px) {
+  .header { padding: 0 4%; gap: 8px; }
+  .brand-logo { width: 36px; height: 36px; }
+  .brand-text b { font-size: 16px; }
+  .brand-text small { font-size: 6.5px; letter-spacing: 0.12em; }
+
+  /* Theme toggle slightly smaller */
+  .theme-toggle { width: 36px; height: 36px; font-size: 14px; }
+
+  /* Products — single column on very small screens */
+  .products-grid { grid-template-columns: 1fr; }
+
+  /* Hero heading */
+  h1 { font-size: clamp(34px, 10vw, 46px); }
+}

@@ -67,24 +67,6 @@ function buildWhatsAppURL(message) {
 /* ── Year ────────────────────────────────────────────────── */
 const yearEl = $('#year');
 if (yearEl) yearEl.textContent = new Date().getFullYear();
-
-/* ── Topline Dismiss ─────────────────────────────────────── */
-(function initToplineDismiss() {
-  const topline = $('#topline');
-  const btn = $('#topline-dismiss');
-  if (!topline || !btn) return;
-
-  // Keep dismissed state within session
-  if (sessionStorage.getItem('topline-dismissed')) {
-    topline.classList.add('dismissed');
-  }
-
-  btn.addEventListener('click', () => {
-    topline.classList.add('dismissed');
-    sessionStorage.setItem('topline-dismissed', '1');
-  });
-})();
-
 /* ── Theme Toggle ────────────────────────────────────────── */
 (function initTheme() {
   const html = document.documentElement;
