@@ -912,3 +912,75 @@ function escapeHTML(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+/* ── Why EduBuds: before / after switch ────────────────── */
+(function initWhySwitch() {
+  const sw = document.querySelector('.why-switch');
+  const grid = document.getElementById('why-grid');
+  if (!sw || !grid) return;
+  const buttons = sw.querySelectorAll('.why-switch-btn');
+  const setMode = (mode) => {
+    sw.dataset.mode = mode;
+    grid.dataset.mode = mode;
+    buttons.forEach((b) => {
+      const on = b.dataset.mode === mode;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+  };
+  buttons.forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  setMode('after');
+})();
+
+/* ── Grade Finder ──────────────────────────────────────── */
+(function initGradeFinder() {
+  const finder = document.getElementById('grade-finder');
+  if (!finder) return;
+  const GRADES = {
+    1: { stage: 'Little Explorers', age: 'Ages 6–7', books: ['Islamic Studies — Grade 1', 'Prophets Sent by Allah', '20 Hadith for Kids'],
+         learn: ['Get to know Allah as the Creator who loves and cares for them', "Learn short du'as for eating, sleeping and leaving home", 'Practise kindness, sharing and saying salaam'] },
+    2: { stage: 'Little Explorers', age: 'Ages 7–8', books: ['Islamic Studies — Grade 2', 'Prophets Sent by Allah', '20 Hadith for Kids'],
+         learn: ['Discover the Five Pillars through simple, everyday examples', 'Learn how to make wudu step by step', 'Meet the first Prophets through gentle stories'] },
+    3: { stage: 'Curious Learners', age: 'Ages 8–9', books: ['Islamic Studies — Grade 3', 'Prophets Sent by Allah', '20 Hadith for Kids'],
+         learn: ['Understand why and how we pray salah', 'Explore the beautiful names of Allah', 'Build manners for the masjid, home and classroom'] },
+    4: { stage: 'Curious Learners', age: 'Ages 9–10', books: ['Islamic Studies — Grade 4', 'Prophets Sent by Allah', '20 Hadith for Kids'],
+         learn: ['Learn about the angels, the books and the messengers', 'Study short surahs with their simple meanings', 'Walk through the early life of the Prophet ﷺ'] },
+    5: { stage: 'Confident Doers', age: 'Ages 10–11', books: ['Islamic Studies — Grade 5', '20 Hadith for Kids'],
+         learn: ['Connect fasting, charity and Ramadan to real life', 'Learn from the Companions and their courage', "Make du'a a natural habit in hard and happy moments"] },
+    6: { stage: 'Confident Doers', age: 'Ages 11–12', books: ['Islamic Studies — Grade 6'],
+         learn: ['Deepen understanding of tawheed and why it matters', "Explore the Prophet's ﷺ character as a role model", 'Introduce tafseer of selected surahs'] },
+    7: { stage: 'Thoughtful Seekers', age: 'Ages 12–13', books: ['Islamic Studies — Grade 7'],
+         learn: ['Ask big questions and find answers in the Qur’an and Sunnah', 'Learn the history of Islamic civilisation', 'Navigate friendships and choices with Islamic values'] },
+    8: { stage: 'Thoughtful Seekers', age: 'Ages 13–14', books: ['Islamic Studies — Grade 8'],
+         learn: ['Understand the purpose of worship beyond the rituals', 'Study biographies of great Muslim scholars and leaders', 'Practise honesty, responsibility and service'] },
+    9: { stage: 'Shining Leaders', age: 'Ages 14–15', books: ['Islamic Studies — Grade 9'],
+         learn: ['Build a confident, articulate understanding of their faith', 'Reflect on longer passages with tafseer', 'Lead by example at home, at school and online'] },
+  };
+  const orbs = finder.querySelectorAll('.grade-orb');
+  const panel = document.getElementById('gf-panel');
+  const stage = document.getElementById('gf-stage');
+  const age = document.getElementById('gf-age');
+  const list = document.getElementById('gf-list');
+  const books = document.getElementById('gf-books');
+  const cta = document.getElementById('gf-cta');
+
+  const select = (g) => {
+    const d = GRADES[g];
+    if (!d) return;
+    orbs.forEach((o) => {
+      const on = o.dataset.grade === String(g);
+      o.classList.toggle('is-active', on);
+      o.setAttribute('aria-pressed', String(on));
+    });
+    stage.textContent = d.stage;
+    age.textContent = `Grade ${g} · ${d.age}`;
+    list.innerHTML = d.learn.map((l) => `<li>${escapeHTML(l)}</li>`).join('');
+    books.innerHTML = d.books.map((b) => `<li>${escapeHTML(b)}</li>`).join('');
+    const msg = encodeURIComponent(`Assalamu alaikum! My child is in Grade ${g}. Which EduBuds books would you recommend?`);
+    cta.href = `https://wa.me/919222315006?text=${msg}`;
+    cta.textContent = `Ask about Grade ${g} books ↗`;
+    panel.classList.remove('is-switching');
+    void panel.offsetWidth;
+    panel.classList.add('is-switching');
+  };
+  orbs.forEach((o) => o.addEventListener('click', () => select(o.dataset.grade)));
+})();
