@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════
    EduBuds — script.js
    Learn · Grow · Shine
    ═══════════════════════════════════════════════════════ */
@@ -343,7 +343,7 @@ const PRODUCTS_DATA = {
     if (id === 'all') {
       dotEl.style.background = '#279447';
       textEl.textContent = 'All Books';
-      descEl.textContent = 'Browse the complete EduBuds catalogue across all three series.';
+      descEl.textContent = 'Browse the complete EduBuds catalogue across all series.';
     } else {
       const s = series.find(x => x.id === id);
       if (!s) return;
