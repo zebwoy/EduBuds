@@ -795,17 +795,6 @@ function renderHeroFloatCards(seriesData) {
 
   const positions = ['float-card-1', 'float-card-2', 'float-card-3', 'float-card-4'];
 
-  function getSeriesIcon(s, idx) {
-    const text = ((s.id || '') + ' ' + (s.label || '')).toLowerCase();
-    if (text.includes('prophet')) return '🌙';
-    if (text.includes('hadith'))  return '✨';
-    if (text.includes('quran') || text.includes('studies')) return '📖';
-    if (text.includes('arabic')) return '✍️';
-    if (text.includes('dua'))    return '🤲';
-    const defaults = ['📖', '🌙', '✨', '🌟', '📚', '🕌', '🌿'];
-    return defaults[idx % defaults.length];
-  }
-
   function cleanSub(s) {
     if (s.books && s.books.length > 0) {
       const bCount = s.books.length === 1 ? '1 book' : `${s.books.length} books`;
@@ -830,13 +819,11 @@ function renderHeroFloatCards(seriesData) {
     card.setAttribute('aria-label', `Explore ${s.label}`);
     card.dataset.series = s.id;
 
-    const icon = getSeriesIcon(s, slotIdx);
     const subText = cleanSub(s);
     const accentColor = s.color || 'var(--blue)';
-    const accentLight = s.colorLight || 'var(--blue-light)';
 
     card.innerHTML = `
-      <div class="fc-icon" style="background:${accentLight};color:${accentColor}">${icon}</div>
+      <span class="fc-dot" style="background:${accentColor};color:${accentColor}"></span>
       <div class="fc-content">
         <div class="fc-title">${escapeHTML(s.label)}</div>
         <div class="fc-sub">${escapeHTML(subText)}</div>
