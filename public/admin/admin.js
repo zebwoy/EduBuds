@@ -307,22 +307,115 @@ if (logoutBtn) {
   logoutBtn.addEventListener('click', () => handleLogout());
 }
 
-/* ── Tab Switching ─────────────────────────────────────────── */
+/* ── Tab Switching & Mobile Drawer UX ──────────────────────── */
 const navItems = document.querySelectorAll('.nav-item[data-tab]');
+const bottomNavItems = document.querySelectorAll('.bottom-nav-item[data-tab]');
 const contentTabs = document.querySelectorAll('.content-tab');
+const sidebarEl = document.getElementById('cms-sidebar');
+const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+const bottomNavMoreBtn = document.getElementById('bottom-nav-more');
 
+function openDrawer() {
+  if (sidebarEl) sidebarEl.classList.add('sidebar-open');
+  if (sidebarBackdrop) sidebarBackdrop.classList.add('active');
+  if (sidebarToggleBtn) {
+    sidebarToggleBtn.setAttribute('aria-expanded', 'true');
+    const menuIcon = sidebarToggleBtn.querySelector('.icon-menu');
+    const closeIcon = sidebarToggleBtn.querySelector('.icon-close');
+    if (menuIcon) menuIcon.classList.add('hidden');
+    if (closeIcon) closeIcon.classList.remove('hidden');
+  }
+  document.body.classList.add('drawer-locked');
+}
+
+function closeDrawer() {
+  if (sidebarEl) sidebarEl.classList.remove('sidebar-open');
+  if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+  if (sidebarToggleBtn) {
+    sidebarToggleBtn.setAttribute('aria-expanded', 'false');
+    const menuIcon = sidebarToggleBtn.querySelector('.icon-menu');
+    const closeIcon = sidebarToggleBtn.querySelector('.icon-close');
+    if (menuIcon) menuIcon.classList.remove('hidden');
+    if (closeIcon) closeIcon.classList.add('hidden');
+  }
+  document.body.classList.remove('drawer-locked');
+}
+
+function toggleDrawer() {
+  if (sidebarEl && sidebarEl.classList.contains('sidebar-open')) {
+    closeDrawer();
+  } else {
+    openDrawer();
+  }
+}
+
+if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', toggleDrawer);
+if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', closeDrawer);
+if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeDrawer);
+if (bottomNavMoreBtn) bottomNavMoreBtn.addEventListener('click', openDrawer);
+
+// Close drawer on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && sidebarEl && sidebarEl.classList.contains('sidebar-open')) {
+    closeDrawer();
+  }
+});
+
+function switchTab(targetTabId) {
+  if (!targetTabId) return;
+
+  // Sync sidebar active state
+  navItems.forEach(nav => {
+    if (nav.dataset.tab === targetTabId) {
+      nav.classList.add('active');
+    } else {
+      nav.classList.remove('active');
+    }
+  });
+
+  // Sync bottom nav active state
+  bottomNavItems.forEach(bNav => {
+    if (bNav.dataset.tab === targetTabId) {
+      bNav.classList.add('active');
+    } else {
+      bNav.classList.remove('active');
+    }
+  });
+
+  // Sync content panes
+  contentTabs.forEach(tab => {
+    if (tab.id === targetTabId) {
+      tab.classList.add('active');
+    } else {
+      tab.classList.remove('active');
+    }
+  });
+
+  // Close drawer if open on mobile/tablet
+  closeDrawer();
+
+  // Scroll main view to top smoothly
+  const mainContent = document.querySelector('.cms-main-content');
+  if (mainContent) {
+    mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// Bind sidebar items
 navItems.forEach(item => {
   item.addEventListener('click', () => {
-    const targetTabId = item.dataset.tab;
+    switchTab(item.dataset.tab);
+  });
+});
 
-    navItems.forEach(nav => nav.classList.remove('active'));
-    contentTabs.forEach(tab => tab.classList.remove('active'));
-
-    item.classList.add('active');
-    const targetTab = document.getElementById(targetTabId);
-    if (targetTab) {
-      targetTab.classList.add('active');
-    }
+// Bind bottom nav items
+bottomNavItems.forEach(item => {
+  item.addEventListener('click', () => {
+    switchTab(item.dataset.tab);
   });
 });
 

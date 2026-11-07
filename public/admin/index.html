@@ -71,29 +71,34 @@
     <!-- Top Navigation Bar -->
     <header class="cms-topbar">
       <div class="topbar-left">
+        <button type="button" id="sidebar-toggle-btn" class="sidebar-toggle-btn" aria-label="Toggle navigation drawer" aria-expanded="false">
+          <svg class="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          <svg class="icon-close hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+
         <a href="/admin" class="topbar-brand">
           <img src="/assets/edubuds-logo.webp" alt="EduBuds" class="topbar-logo">
           <div class="brand-headings">
             <span class="brand-title">EduBuds <b>CMS</b></span>
-            <span class="brand-env-badge">Production Studio</span>
+            <span class="brand-env-badge"><span class="env-pulse-dot"></span><span class="env-badge-text">Production Studio</span></span>
           </div>
         </a>
       </div>
 
       <div class="topbar-right">
-        <a href="/" target="_blank" rel="noopener noreferrer" class="btn-subtle" title="Open live public website">
+        <a href="/" target="_blank" rel="noopener noreferrer" class="btn-subtle btn-live-site" title="Open live public website" aria-label="Open live public website">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-          <span>Live Site</span>
+          <span class="btn-label-desktop">Live Site</span>
         </a>
 
-        <div class="admin-pill">
+        <div class="admin-pill" title="Signed in as Admin">
           <span class="admin-avatar">A</span>
-          <span id="current-username" class="admin-name">Admin</span>
+          <span id="current-username" class="admin-name btn-label-desktop">Admin</span>
         </div>
 
-        <button id="logout-btn" class="btn-subtle btn-logout" title="Log out of CMS">
+        <button id="logout-btn" class="btn-subtle btn-logout" title="Log out of CMS" aria-label="Log out">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-          <span>Logout</span>
+          <span class="btn-label-desktop">Logout</span>
         </button>
       </div>
     </header>
@@ -101,8 +106,16 @@
     <!-- Main Workspace (Sidebar + Views) -->
     <div class="cms-workspace">
 
-      <!-- Navigation Sidebar -->
-      <aside class="cms-sidebar">
+      <!-- Navigation Sidebar Drawer -->
+      <aside class="cms-sidebar" id="cms-sidebar">
+        <div class="sidebar-header-mobile">
+          <div class="sidebar-mobile-brand">
+            <img src="/assets/edubuds-logo.webp" alt="EduBuds" class="sidebar-logo">
+            <span>Navigation</span>
+          </div>
+          <button type="button" id="sidebar-close-btn" class="sidebar-close-btn" aria-label="Close navigation drawer">&times;</button>
+        </div>
+
         <nav class="sidebar-nav">
           <div class="nav-section-label">General</div>
           <button class="nav-item active" data-tab="tab-dashboard">
@@ -156,6 +169,9 @@
           <small class="version-tag">EduBuds CMS v1.0.0</small>
         </div>
       </aside>
+
+      <!-- Sidebar Backdrop for Mobile/Tablet Drawer -->
+      <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
 
       <!-- Content Views Panel -->
       <main class="cms-main-content">
@@ -869,6 +885,30 @@
 
       </main>
     </div>
+
+    <!-- Mobile Bottom Quick Navigation Bar -->
+    <nav class="cms-bottom-nav" aria-label="Mobile quick navigation">
+      <button type="button" class="bottom-nav-item active" data-tab="tab-dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+        <span>Dashboard</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-tab="tab-catalogue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>Books</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-tab="tab-media">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+        <span>Media</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-tab="tab-settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <span>Settings</span>
+      </button>
+      <button type="button" class="bottom-nav-item" id="bottom-nav-more" aria-label="Open full menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        <span>More</span>
+      </button>
+    </nav>
   </div>
 
   <!-- ── MODAL: ADD / EDIT BOOK ────────────────────────────── -->
