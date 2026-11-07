@@ -273,27 +273,135 @@
       </p>
     </section>
 
-    <!-- ── Approach Section ────────────────────────────── -->
+    <!-- ── Approach Section (Our Educational Purpose) ────── -->
     <section class="approach" id="approach" aria-labelledby="approach-heading">
-      <!-- Art -->
+      <!-- Bespoke Vector Art: Tree of Continuous Growth -->
       <div class="approach-art" aria-hidden="true">
-        <div class="approach-orbit"></div>
-        <div class="approach-orbit approach-orbit-2"></div>
-        <div class="sprout-wrap">
-          <div class="sprout-stem" id="sprout-stem"></div>
-          <div class="sprout-leaf"></div>
-          <div class="sprout-leaf"></div>
-          <div class="sprout-leaf"></div>
-          <div class="sprout-sun"></div>
+        <div class="approach-art-canvas">
+          <svg class="tree-of-growth-svg" viewBox="0 0 400 460" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Color Gradients -->
+              <linearGradient id="bookCoverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0c2a55" />
+                <stop offset="100%" stop-color="#0878c9" />
+              </linearGradient>
+              <linearGradient id="bookPageGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#ddecff" stop-opacity="0.8" />
+              </linearGradient>
+              <linearGradient id="stemGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%" stop-color="#1b6e32" />
+                <stop offset="50%" stop-color="#279447" />
+                <stop offset="100%" stop-color="#3aad5c" />
+              </linearGradient>
+              <linearGradient id="leafGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3aad5c" />
+                <stop offset="100%" stop-color="#279447" />
+              </linearGradient>
+              <linearGradient id="leafGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#8ddd82" />
+                <stop offset="100%" stop-color="#23883f" />
+              </linearGradient>
+              <linearGradient id="sunGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffe680" />
+                <stop offset="100%" stop-color="#ffc20e" />
+              </linearGradient>
+              <filter id="solarGlow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="12" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+
+            <!-- Celestial Orbit Rings (Continuity & Universe of Learning) -->
+            <g class="art-orbits">
+              <circle cx="200" cy="235" r="170" stroke="rgba(255,255,255,0.08)" stroke-width="1.2" stroke-dasharray="4 6" class="spin-slow" />
+              <circle cx="200" cy="235" r="125" stroke="rgba(255,194,14,0.18)" stroke-width="1.2" stroke-dasharray="6 8" class="spin-reverse" />
+              <circle cx="70" cy="180" r="2.5" fill="#ffc20e" opacity="0.75" />
+              <circle cx="330" cy="160" r="2" fill="#8ddd82" opacity="0.65" />
+              <circle cx="95" cy="310" r="2" fill="#4da5ff" opacity="0.65" />
+              <circle cx="305" cy="320" r="2.5" fill="#ffc20e" opacity="0.75" />
+            </g>
+
+            <!-- STAGE 3 (SHINE): The Radiant Noor Sun at Peak -->
+            <g class="art-layer art-sun-layer" id="art-layer-sun">
+              <!-- Radial rays -->
+              <g stroke="#ffc20e" stroke-width="2.5" stroke-linecap="round" opacity="0.8" class="sun-rays">
+                <line x1="200" y1="36" x2="200" y2="18" />
+                <line x1="200" y1="124" x2="200" y2="142" />
+                <line x1="156" y1="80" x2="138" y2="80" />
+                <line x1="244" y1="80" x2="262" y2="80" />
+                <line x1="168" y1="48" x2="155" y2="35" />
+                <line x1="232" y1="112" x2="245" y2="125" />
+                <line x1="168" y1="112" x2="155" y2="125" />
+                <line x1="232" y1="48" x2="245" y2="35" />
+              </g>
+              <!-- Sun halos -->
+              <circle cx="200" cy="80" r="42" fill="rgba(255,194,14,0.14)" />
+              <circle cx="200" cy="80" r="32" fill="url(#sunGradient)" filter="url(#solarGlow)" />
+              <!-- Eight-fold star core -->
+              <polygon points="200,64 204,74 214,70 208,79 216,85 206,87 205,97 197,90 188,94 191,85 184,78 194,76" fill="#ffffff" opacity="0.9" />
+            </g>
+
+            <!-- STAGE 2 (GROW): The Stem and Living Leaves -->
+            <g class="art-layer art-stem-layer" id="art-layer-stem">
+              <!-- Main Living Trunk -->
+              <path d="M 200 370 Q 198 250 200 120" stroke="url(#stemGradient)" stroke-width="10" stroke-linecap="round" class="stem-path" />
+
+              <!-- Leaf Pair 1 (Upper Reach) -->
+              <g class="leaf-pair leaf-upper">
+                <path d="M 197 180 C 145 160 110 185 118 205 C 150 220 185 198 197 180 Z" fill="url(#leafGrad1)" />
+                <path d="M 195 181 Q 155 188 126 202" stroke="rgba(255,255,255,0.45)" stroke-width="1.5" stroke-linecap="round" />
+
+                <path d="M 203 165 C 255 145 290 170 282 190 C 250 205 215 183 203 165 Z" fill="url(#leafGrad2)" />
+                <path d="M 205 166 Q 245 173 274 187" stroke="rgba(255,255,255,0.45)" stroke-width="1.5" stroke-linecap="round" />
+              </g>
+
+              <!-- Leaf Pair 2 (Middle Canopy) -->
+              <g class="leaf-pair leaf-mid">
+                <path d="M 198 245 C 135 230 95 260 105 285 C 145 300 185 270 198 245 Z" fill="url(#leafGrad2)" />
+                <path d="M 196 246 Q 146 258 114 280" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round" />
+
+                <path d="M 202 230 C 265 215 305 245 295 270 C 255 285 215 255 202 230 Z" fill="url(#leafGrad1)" />
+                <path d="M 204 231 Q 254 243 286 265" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round" />
+              </g>
+            </g>
+
+            <!-- STAGE 1 (LEARN): The Open Book Foundation at Base -->
+            <g class="art-layer art-book-layer" id="art-layer-book">
+              <!-- Shadow base -->
+              <ellipse cx="200" cy="405" rx="140" ry="20" fill="rgba(8,120,201,0.22)" />
+
+              <!-- Binding & Cover (Navy / Gilded Gold) -->
+              <path d="M 70 380 Q 200 405 330 380 L 330 395 Q 200 420 70 395 Z" fill="url(#bookCoverGrad)" />
+              <path d="M 70 392 Q 200 417 330 392" stroke="#ffc20e" stroke-width="2" opacity="0.85" />
+
+              <!-- Left Page Wing -->
+              <path d="M 200 375 Q 130 365 72 380 C 72 380 95 352 135 348 Q 175 345 200 365 Z" fill="url(#bookPageGrad)" />
+              <path d="M 198 368 Q 135 355 85 372" stroke="rgba(18,59,112,0.18)" stroke-width="1.5" />
+              <path d="M 196 360 Q 145 350 100 365" stroke="rgba(18,59,112,0.12)" stroke-width="1.2" />
+
+              <!-- Right Page Wing -->
+              <path d="M 200 375 Q 270 365 328 380 C 328 380 305 352 265 348 Q 225 345 200 365 Z" fill="url(#bookPageGrad)" />
+              <path d="M 202 368 Q 265 355 315 372" stroke="rgba(18,59,112,0.18)" stroke-width="1.5" />
+              <path d="M 204 360 Q 255 350 300 365" stroke="rgba(18,59,112,0.12)" stroke-width="1.2" />
+
+              <!-- Center Spine Accent -->
+              <path d="M 200 365 L 200 402" stroke="#ffc20e" stroke-width="3" stroke-linecap="round" />
+            </g>
+          </svg>
+
+          <!-- Floating Milestone Seal -->
+          <div class="approach-seal">
+            <span class="seal-icon">✦</span>
+            <div class="seal-text">
+              <strong>LEARN · GROW · SHINE</strong>
+              <small>A Connected Continuum across Grades 1–9</small>
+            </div>
+          </div>
         </div>
-        <div class="sprout-book">
-          EDUBUDS<br><small>LEARN · GROW · SHINE</small>
-        </div>
-        <span class="approach-spark">✦</span>
-        <span class="approach-spark">✳</span>
       </div>
 
-      <!-- Copy -->
+      <!-- Copy & Progressive Educational Pathway -->
       <div class="approach-copy reveal">
         <div class="eyebrow light"><span class="mark">✳</span> OUR EDUCATIONAL PURPOSE</div>
         <h2 id="approach-heading">
@@ -306,26 +414,45 @@
           one that shapes the whole child, not just their answers.
         </p>
 
-        <div class="approach-pillars">
-          <div class="pillar">
-            <div class="pillar-icon">📖</div>
-            <div class="pillar-text">
-              <h4>Meaningful Knowledge</h4>
-              <p>Structured learning across nine grades — every concept building on the last.</p>
+        <!-- Progressive Pathway (No generic stock icons) -->
+        <div class="approach-pathway">
+          <!-- Step 1: Learn -->
+          <div class="pathway-step" data-step="1">
+            <div class="step-indicator step-blue">
+              <span class="step-num">01</span>
+            </div>
+            <div class="step-body">
+              <div class="step-badge">LEARN · THE FOUNDATION</div>
+              <h3 class="step-title">Rooted in Understanding</h3>
+              <p class="step-desc">Concepts are never taught in isolation. Every grade progressively connects creed, reasoning, and context so children grasp the wisdom behind what they believe — building conviction rather than rote recall.</p>
             </div>
           </div>
-          <div class="pillar">
-            <div class="pillar-icon">🌱</div>
-            <div class="pillar-text">
-              <h4>Everyday Practice</h4>
-              <p>Six strands woven through every module, connecting belief to daily life.</p>
+
+          <div class="pathway-connector" aria-hidden="true"></div>
+
+          <!-- Step 2: Grow -->
+          <div class="pathway-step" data-step="2">
+            <div class="step-indicator step-green">
+              <span class="step-num">02</span>
+            </div>
+            <div class="step-body">
+              <div class="step-badge">GROW · THE LIVING PRACTICE</div>
+              <h3 class="step-title">Habit, Worship &amp; Daily Life</h3>
+              <p class="step-desc">Six continuous curriculum strands weave du'as, prayer, and practical manners directly into everyday routines. Faith becomes an intuitive, lived reality that children look forward to practicing.</p>
             </div>
           </div>
-          <div class="pillar">
-            <div class="pillar-icon">✨</div>
-            <div class="pillar-text">
-              <h4>Lasting Character</h4>
-              <p>Learning that shapes who children are — not just what they can recall.</p>
+
+          <div class="pathway-connector" aria-hidden="true"></div>
+
+          <!-- Step 3: Shine -->
+          <div class="pathway-step" data-step="3">
+            <div class="step-indicator step-yellow">
+              <span class="step-num">03</span>
+            </div>
+            <div class="step-body">
+              <div class="step-badge">SHINE · THE LASTING FRUIT</div>
+              <h3 class="step-title">Character That Endures</h3>
+              <p class="step-desc">The ultimate goal of Islamic education is akhlaq. We nurture empathy, integrity, and self-confidence, shaping young Muslims who carry their faith with dignity, warmth, and moral leadership.</p>
             </div>
           </div>
         </div>

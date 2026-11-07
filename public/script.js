@@ -460,30 +460,58 @@ const PRODUCTS_DATA = {
   syncProductsFromApi();
 })();
 
-/* ── Sprout animation trigger ─────────────────────────────── */
-(function initSprout() {
-  const stem = $('#sprout-stem');
-  if (!stem) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+/* ── Approach Section: Tree of Growth & Pathway Synergy ──── */
+(function initApproachSynergy() {
+  const treeSvg = document.querySelector('.tree-of-growth-svg');
+  const pathwaySteps = document.querySelectorAll('.pathway-step');
+  if (!treeSvg || !pathwaySteps.length) return;
 
-  // Reset animation when approach section scrolls into view
-  const approach = $('#approach');
-  if (!approach) return;
+  pathwaySteps.forEach((step) => {
+    const stepNum = step.getAttribute('data-step');
+    if (!stepNum) return;
 
-  let played = false;
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting && !played) {
-        played = true;
-        // Restart CSS animation
-        stem.style.animation = 'none';
-        stem.offsetHeight; // reflow
-        stem.style.animation = '';
+    const setHighlight = () => {
+      treeSvg.classList.remove('highlight-1', 'highlight-2', 'highlight-3');
+      treeSvg.classList.add(`highlight-${stepNum}`);
+    };
+
+    const clearHighlight = () => {
+      treeSvg.classList.remove(`highlight-${stepNum}`);
+    };
+
+    step.addEventListener('mouseenter', setHighlight);
+    step.addEventListener('mouseleave', clearHighlight);
+    step.addEventListener('focus', setHighlight);
+    step.addEventListener('blur', clearHighlight);
+
+    // Mobile / touch support: tap to highlight
+    step.addEventListener('click', () => {
+      const activeClass = `highlight-${stepNum}`;
+      if (treeSvg.classList.contains(activeClass)) {
+        treeSvg.classList.remove(activeClass);
+      } else {
+        treeSvg.classList.remove('highlight-1', 'highlight-2', 'highlight-3');
+        treeSvg.classList.add(activeClass);
       }
     });
-  }, { threshold: 0.3 });
+  });
 
-  io.observe(approach);
+  // Entrance animation observer
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const approach = $('#approach');
+    if (approach && 'IntersectionObserver' in window) {
+      let animated = false;
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !animated) {
+            animated = true;
+            treeSvg.classList.add('approach-in-view');
+          }
+        });
+      }, { threshold: 0.25 });
+      io.observe(approach);
+    }
+  }
 })();
 
 /* ── Newsletter form ──────────────────────────────────────── */

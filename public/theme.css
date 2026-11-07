@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════
    EduBuds — Design System
    Learn · Grow · Shine
    ═══════════════════════════════════════════════════════ */
@@ -1194,14 +1194,14 @@ em { font-style: normal; color: var(--green); }
 .grade-orb:nth-child(3n+2) { background: var(--green); border-color: transparent; }
 .grade-orb:nth-child(3n)   { background: var(--blue); border-color: transparent; }
 
-/* ── Approach Section ─────────────────────────────────── */
+/* ── Approach Section (Our Educational Purpose) ───────── */
 .approach {
   background: var(--navy);
   display: grid;
-  grid-template-columns: 0.9fr 1fr;
-  gap: 10%;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: clamp(40px, 6vw, 84px);
   align-items: center;
-  padding: var(--gap-2xl) 6%;
+  padding: clamp(70px, 8vw, 110px) 6%;
   position: relative;
   overflow: hidden;
   transition: background 0.4s;
@@ -1217,194 +1217,353 @@ em { font-style: normal; color: var(--green); }
   pointer-events: none;
 }
 
-/* Approach art */
+/* Ambient pedagogical aura in background */
+.approach::after {
+  content: '';
+  position: absolute;
+  left: 15%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(8, 120, 201, 0.16) 0%, rgba(39, 148, 71, 0.08) 45%, transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Approach art container */
 .approach-art {
   position: relative;
-  height: 380px;
-  display: grid;
-  place-items: center;
-}
-
-.approach-orbit {
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  border: 1px dashed rgba(255,255,255,0.15);
-  border-radius: 50%;
-  animation: spin 50s linear infinite;
-}
-
-.approach-orbit-2 {
-  width: 210px;
-  height: 210px;
-  border-color: rgba(255,194,14,0.2);
-  animation-duration: 35s;
-  animation-direction: reverse;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Sprout */
-.sprout-wrap {
-  position: relative;
-  width: 200px;
-  height: 280px;
+  width: 100%;
   display: flex;
-  align-items: flex-end;
   justify-content: center;
+  align-items: center;
+  z-index: 1;
 }
 
-.sprout-stem {
-  position: absolute;
-  bottom: 0;
-  width: 12px;
-  background: var(--green-mid);
-  border-radius: 6px;
-  animation: sprout-grow 2s var(--ease-out) forwards;
-  transform-origin: bottom;
-  height: 0;
+.approach-art-canvas {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-@keyframes sprout-grow {
-  to { height: 180px; }
-}
-
-.sprout-leaf {
-  position: absolute;
-  width: 90px;
-  height: 50px;
-  background: var(--green-mid);
-  border-radius: 100% 0 100% 0;
-  opacity: 0;
-  animation: leaf-appear 0.6s var(--ease-spring) forwards;
-}
-
-.sprout-leaf:nth-child(2) { top: 60px; left: 14px; transform: rotate(15deg); animation-delay: 1.2s; }
-.sprout-leaf:nth-child(3) { top: 100px; right: 14px; transform: scaleX(-1) rotate(15deg); background: #23883f; animation-delay: 1.5s; }
-.sprout-leaf:nth-child(4) { top: 20px; left: 10px; transform: rotate(8deg); animation-delay: 1.8s; }
-
-@keyframes leaf-appear {
-  from { opacity: 0; transform: scale(0.3) rotate(15deg); }
-  to   { opacity: 1; }
-}
-
-.sprout-sun {
-  position: absolute;
-  top: 10px;
-  width: 56px;
-  height: 56px;
-  background: var(--yellow);
-  border-radius: 50%;
-  box-shadow: var(--shadow-glow-yellow);
-  animation: sun-glow 3s ease-in-out infinite;
-}
-
-.sprout-book {
-  position: absolute;
-  bottom: -8px;
-  background: var(--surface);
-  color: var(--navy);
-  padding: 14px 22px;
-  border-radius: 10px;
-  box-shadow: var(--shadow-lg);
-  font: 800 16px/1.2 var(--display);
-  transform: rotate(-3deg);
-  z-index: 2;
-}
-
-.sprout-book small {
+.tree-of-growth-svg {
+  width: 100%;
+  height: auto;
+  max-height: 480px;
   display: block;
-  font: 600 8px/1 var(--body);
-  letter-spacing: 0.1em;
-  color: var(--green);
-  margin-top: 4px;
+  overflow: visible;
+  filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.45));
+  transition: filter 0.4s ease;
 }
 
-.approach-spark {
-  position: absolute;
-  font-size: 28px;
+/* SVG Animations */
+.art-orbits .spin-slow {
+  transform-origin: 200px 235px;
+  animation: spin 60s linear infinite;
+}
+
+.art-orbits .spin-reverse {
+  transform-origin: 200px 235px;
+  animation: spin 45s linear infinite reverse;
+}
+
+.sun-rays {
+  transform-origin: 200px 80px;
+  animation: sun-rays-pulse 4s ease-in-out infinite alternate;
+}
+
+@keyframes sun-rays-pulse {
+  0%   { opacity: 0.65; transform: scale(0.96) rotate(0deg); }
+  100% { opacity: 0.95; transform: scale(1.04) rotate(4deg); }
+}
+
+.leaf-pair {
+  transform-origin: 200px 210px;
+  animation: leaf-breathe 6s ease-in-out infinite alternate;
+}
+
+.leaf-upper {
+  animation-delay: -1.5s;
+}
+
+@keyframes leaf-breathe {
+  0%   { transform: rotate(-1.5deg) scale(0.98); }
+  100% { transform: rotate(1.5deg) scale(1.02); }
+}
+
+/* Interactive synergy between steps and artwork */
+.art-layer {
+  transition: opacity 0.4s ease, filter 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tree-of-growth-svg.highlight-1 .art-stem-layer,
+.tree-of-growth-svg.highlight-1 .art-sun-layer {
+  opacity: 0.4;
+  filter: saturate(0.6);
+}
+.tree-of-growth-svg.highlight-1 .art-book-layer {
+  filter: drop-shadow(0 0 16px rgba(8, 120, 201, 0.85)) drop-shadow(0 0 24px rgba(255, 194, 14, 0.6));
+  transform: translateY(-2px);
+}
+
+.tree-of-growth-svg.highlight-2 .art-book-layer,
+.tree-of-growth-svg.highlight-2 .art-sun-layer {
+  opacity: 0.4;
+  filter: saturate(0.6);
+}
+.tree-of-growth-svg.highlight-2 .art-stem-layer {
+  filter: drop-shadow(0 0 20px rgba(58, 173, 92, 0.9));
+  transform: scale(1.02);
+}
+
+.tree-of-growth-svg.highlight-3 .art-book-layer,
+.tree-of-growth-svg.highlight-3 .art-stem-layer {
+  opacity: 0.4;
+  filter: saturate(0.6);
+}
+.tree-of-growth-svg.highlight-3 .art-sun-layer {
+  filter: drop-shadow(0 0 24px rgba(255, 194, 14, 0.95)) drop-shadow(0 0 36px rgba(255, 230, 128, 0.7));
+  transform: scale(1.06);
+}
+
+/* Floating Milestone Seal */
+.approach-seal {
+  position: relative;
+  margin-top: -18px;
+  z-index: 3;
+  background: rgba(12, 34, 66, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 194, 14, 0.35);
+  border-radius: 999px;
+  padding: 10px 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 194, 14, 0.15);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s;
+}
+
+.approach-seal:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 194, 14, 0.65);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 26px rgba(255, 194, 14, 0.28);
+}
+
+.seal-icon {
   color: var(--yellow);
-  animation: spark-float 4s ease-in-out infinite;
+  font-size: 15px;
+  animation: seal-pulse 2.5s ease-in-out infinite;
 }
 
-.approach-spark:nth-child(1) { top: 30px; left: 20px; animation-delay: 0s; }
-.approach-spark:nth-child(2) { top: 60px; right: 10px; animation-delay: 1s; color: var(--pink); font-size: 22px; }
-
-@keyframes sun-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(255,194,14,0.4); }
-  50%       { box-shadow: 0 0 50px rgba(255,194,14,0.7); }
+@keyframes seal-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50%      { transform: scale(1.2); opacity: 1; filter: drop-shadow(0 0 6px var(--yellow)); }
 }
 
-@keyframes spark-float {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50%       { transform: translateY(-12px) rotate(15deg); }
+.seal-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.seal-text strong {
+  font: 800 12px/1.2 var(--display);
+  letter-spacing: 0.08em;
+  color: #ffffff;
+}
+
+.seal-text small {
+  font: 500 10.5px/1.2 var(--body);
+  color: rgba(255, 255, 255, 0.68);
+  letter-spacing: 0.02em;
+  margin-top: 2px;
 }
 
 /* Approach copy */
 .approach-copy { position: relative; z-index: 1; }
 
 .approach-copy h2 {
-  font-size: clamp(40px, 4.2vw, 60px);
+  font-size: clamp(38px, 4vw, 56px);
   color: #fff;
-  margin: 18px 0 18px;
-  line-height: 1.05;
+  margin: 18px 0 16px;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
 }
 
-.approach-copy h2 em { color: #8ddd82; }
-
-.approach-copy p {
-  font-size: 14px;
-  line-height: 1.9;
-  color: rgba(255,255,255,0.6);
-  max-width: 460px;
+.approach-copy h2 em {
+  font-style: italic;
+  color: #8ddd82;
+  font-family: var(--display);
 }
 
-.approach-pillars {
-  display: grid;
-  gap: 12px;
-  margin: 24px 0 30px;
+.approach-copy > p {
+  font-size: 14.5px;
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 520px;
 }
 
-.pillar {
+/* Progressive Pedagogical Pathway */
+.approach-pathway {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 30px 0 34px;
+  position: relative;
+}
+
+.pathway-step {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  padding: 14px 16px;
-  background: rgba(255,255,255,0.05);
-  border-radius: var(--r-md);
-  border: 1px solid rgba(255,255,255,0.07);
-  transition: background 0.3s, border-color 0.3s;
+  gap: 20px;
+  padding: 18px 22px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-lg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  position: relative;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
 }
 
-.pillar:hover {
-  background: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.12);
+.pathway-step::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: transparent;
+  transition: background 0.3s, box-shadow 0.3s;
 }
 
-.pillar-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.1);
+.step-indicator {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
-  font-size: 16px;
   flex-shrink: 0;
-  margin-top: 1px;
+  position: relative;
+  font: 800 15px/1 var(--display);
+  letter-spacing: -0.02em;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
 }
 
-.pillar-text h4 {
-  font: 700 13px/1.3 var(--display);
-  color: #fff;
+.step-blue {
+  background: rgba(8, 120, 201, 0.2);
+  border: 1px solid rgba(77, 165, 255, 0.35);
+  color: #7cc0ff;
+}
+
+.step-green {
+  background: rgba(39, 148, 71, 0.2);
+  border: 1px solid rgba(141, 221, 130, 0.35);
+  color: #8ddd82;
+}
+
+.step-yellow {
+  background: rgba(255, 194, 14, 0.18);
+  border: 1px solid rgba(255, 194, 14, 0.35);
+  color: #ffd647;
+}
+
+/* Hover highlights by series color code */
+.pathway-step[data-step="1"]:hover {
+  background: rgba(8, 120, 201, 0.09);
+  border-color: rgba(77, 165, 255, 0.4);
+  transform: translateX(6px);
+}
+.pathway-step[data-step="1"]:hover::before {
+  background: #4da5ff;
+  box-shadow: 0 0 12px #4da5ff;
+}
+.pathway-step[data-step="1"]:hover .step-indicator {
+  transform: scale(1.06);
+  box-shadow: 0 0 16px rgba(77, 165, 255, 0.45);
+}
+
+.pathway-step[data-step="2"]:hover {
+  background: rgba(39, 148, 71, 0.09);
+  border-color: rgba(141, 221, 130, 0.4);
+  transform: translateX(6px);
+}
+.pathway-step[data-step="2"]:hover::before {
+  background: #8ddd82;
+  box-shadow: 0 0 12px #8ddd82;
+}
+.pathway-step[data-step="2"]:hover .step-indicator {
+  transform: scale(1.06);
+  box-shadow: 0 0 16px rgba(141, 221, 130, 0.45);
+}
+
+.pathway-step[data-step="3"]:hover {
+  background: rgba(255, 194, 14, 0.09);
+  border-color: rgba(255, 194, 14, 0.45);
+  transform: translateX(6px);
+}
+.pathway-step[data-step="3"]:hover::before {
+  background: #ffc20e;
+  box-shadow: 0 0 12px #ffc20e;
+}
+.pathway-step[data-step="3"]:hover .step-indicator {
+  transform: scale(1.06);
+  box-shadow: 0 0 16px rgba(255, 194, 14, 0.45);
+}
+
+.step-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-badge {
+  font: 800 10.5px/1 var(--body);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.pathway-step[data-step="1"] .step-badge {
+  color: #7cc0ff;
+}
+
+.pathway-step[data-step="2"] .step-badge {
+  color: #8ddd82;
+}
+
+.pathway-step[data-step="3"] .step-badge {
+  color: #ffd647;
+}
+
+.step-title {
+  font: 800 16.5px/1.3 var(--display);
+  color: #ffffff;
   letter-spacing: -0.01em;
-  margin-bottom: 3px;
+  margin: 0 0 5px 0;
 }
 
-.pillar-text p {
-  font-size: 11.5px;
-  color: rgba(255,255,255,0.5);
-  line-height: 1.6;
+.step-desc {
+  font-size: 13px;
+  line-height: 1.68;
+  color: rgba(255, 255, 255, 0.68);
   margin: 0;
+}
+
+.pathway-connector {
+  width: 2px;
+  height: 14px;
+  margin: 0 0 0 43px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.06));
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Parents Section ──────────────────────────────────── */
@@ -1755,8 +1914,13 @@ footer {
 
   .strand-grid { grid-template-columns: repeat(2, 1fr); }
 
-  .approach { grid-template-columns: 1fr; gap: 48px; }
-  .approach-art { height: 280px; order: 2; }
+  .approach { grid-template-columns: 1fr; gap: 40px; padding: 60px 5%; }
+  .approach-art { height: auto; max-width: 360px; order: 2; margin: 0 auto; width: 100%; }
+  .approach-copy { order: 1; }
+  .tree-of-growth-svg { max-height: 380px; }
+  .pathway-step { padding: 16px 18px; gap: 16px; }
+  .step-indicator { width: 40px; height: 40px; font-size: 14px; }
+  .pathway-connector { margin-left: 38px; height: 12px; }
 
   .parents { grid-template-columns: 1fr; }
 
@@ -1786,8 +1950,15 @@ footer {
   }
   .grade-orbs { justify-content: center; }
 
-  .approach-orbit { width: 220px; height: 220px; }
-  .approach-orbit-2 { width: 160px; height: 160px; }
+  .approach { padding: 48px 4%; gap: 32px; }
+  .approach-art { max-width: 300px; }
+  .tree-of-growth-svg { max-height: 320px; }
+  .approach-seal { padding: 8px 16px; gap: 10px; margin-top: -12px; }
+  .seal-text strong { font-size: 11px; }
+  .seal-text small { font-size: 9.5px; }
+  .pathway-step { padding: 14px 16px; gap: 14px; }
+  .step-title { font-size: 15px; }
+  .step-desc { font-size: 12.5px; line-height: 1.6; }
 
   .form-row { grid-template-columns: 1fr; }
   .nl-submit { height: 48px; }
@@ -2195,8 +2366,13 @@ footer.site-footer {
   .strand-grid { grid-template-columns: repeat(2, 1fr); }
 
   /* Approach — stack vertically */
-  .approach { grid-template-columns: 1fr; gap: 48px; }
-  .approach-art { height: 280px; order: 2; }
+  .approach { grid-template-columns: 1fr; gap: 40px; padding: 60px 5%; }
+  .approach-art { height: auto; max-width: 360px; order: 2; margin: 0 auto; width: 100%; }
+  .approach-copy { order: 1; }
+  .tree-of-growth-svg { max-height: 380px; }
+  .pathway-step { padding: 16px 18px; gap: 16px; }
+  .step-indicator { width: 40px; height: 40px; font-size: 14px; }
+  .pathway-connector { margin-left: 38px; height: 12px; }
 
   /* Parents — single column */
   .parents { grid-template-columns: 1fr; }
@@ -2299,8 +2475,15 @@ footer.site-footer {
   .grade-orbs { justify-content: center; }
 
   /* Approach orbit sizes */
-  .approach-orbit { width: 220px; height: 220px; }
-  .approach-orbit-2 { width: 160px; height: 160px; }
+  .approach { padding: 48px 4%; gap: 32px; }
+  .approach-art { max-width: 300px; }
+  .tree-of-growth-svg { max-height: 320px; }
+  .approach-seal { padding: 8px 16px; gap: 10px; margin-top: -12px; }
+  .seal-text strong { font-size: 11px; }
+  .seal-text small { font-size: 9.5px; }
+  .pathway-step { padding: 14px 16px; gap: 14px; }
+  .step-title { font-size: 15px; }
+  .step-desc { font-size: 12.5px; line-height: 1.6; }
 
   /* Newsletter form — single column */
   .form-row { grid-template-columns: 1fr; }
@@ -2360,4 +2543,14 @@ footer.site-footer {
     top: 4%;
     left: -2%;
   }
+
+  /* Approach on very small screens */
+  .approach { padding: 40px 3%; }
+  .approach-art { max-width: 260px; }
+  .tree-of-growth-svg { max-height: 280px; }
+  .pathway-step { padding: 12px 14px; gap: 12px; }
+  .step-indicator { width: 34px; height: 34px; font-size: 12.5px; border-radius: 9px; }
+  .pathway-connector { margin-left: 31px; height: 10px; }
+  .step-title { font-size: 14.5px; }
+  .step-desc { font-size: 12px; }
 }
