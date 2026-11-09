@@ -37,7 +37,13 @@ const state = {
   mediaSearch: '',
   hasBlobToken: false,
   uploadFileData: null,
+  uploadTargetCallback: null,
   itemToDelete: null, // { type: 'book' | 'series' | 'media' | 'faq' | 'subscriber', id: string, title: string }
+  lastDeleted: null,
+  undoTimeoutId: null,
+  undoIntervalId: null,
+  defaultBooks: [],
+  missingBooks: [],
 };
 
 // Top-level DOM Elements
@@ -49,6 +55,14 @@ const loginError = document.getElementById('login-error');
 const logoutBtn = document.getElementById('logout-btn');
 const currentUsernameEl = document.getElementById('current-username');
 const toastEl = document.getElementById('cms-toast');
+
+// Floating Undo Action Elements
+const cmsUndoBar = document.getElementById('cms-undo-bar');
+const undoMessage = document.getElementById('undo-message');
+const undoActionBtn = document.getElementById('undo-action-btn');
+const undoTimerBadge = document.getElementById('undo-timer-badge');
+const undoDismissBtn = document.getElementById('undo-dismiss-btn');
+const undoProgressBar = document.getElementById('undo-progress-bar');
 
 // Settings DOM Elements
 const settingsForm = document.getElementById('settings-form');
@@ -70,6 +84,15 @@ const booksGridEl = document.getElementById('books-grid');
 const addBookBtn = document.getElementById('add-book-btn');
 const manageSeriesBtn = document.getElementById('manage-series-btn');
 const seriesCountBadge = document.getElementById('series-count-badge');
+const openRecoveryBtn = document.getElementById('open-recovery-btn');
+const recoveryCountBadge = document.getElementById('recovery-count-badge');
+
+// Catalogue Recovery Modal Elements
+const recoveryModal = document.getElementById('recovery-modal');
+const recoveryEmptyState = document.getElementById('recovery-empty-state');
+const recoveryListContainer = document.getElementById('recovery-list-container');
+const recoveryItemsList = document.getElementById('recovery-items-list');
+const restoreAllMissingBtn = document.getElementById('restore-all-missing-btn');
 
 // Book Modal DOM Elements
 const bookModal = document.getElementById('book-modal');
@@ -81,6 +104,8 @@ const bookFieldTitle = document.getElementById('book-field-title');
 const bookFieldSubtitle = document.getElementById('book-field-subtitle');
 const bookFieldImage = document.getElementById('book-field-image');
 const bookCoverPreview = document.getElementById('book-cover-preview');
+const clearCoverBtn = document.getElementById('clear-cover-btn');
+const uploadCoverDirectBtn = document.getElementById('upload-cover-direct-btn');
 const bookFieldTags = document.getElementById('book-field-tags');
 const bookFieldOrder = document.getElementById('book-field-order');
 const bookFieldDesc = document.getElementById('book-field-desc');
@@ -668,12 +693,149 @@ async function loadCatalogue() {
     renderSeriesOptionsInBookModal();
     renderSeriesFilterPills();
     renderBooksGrid();
+    await checkCatalogueHealth();
   } catch (err) {
     console.error('[CMS] Failed to load catalogue:', err);
     showToast('Could not load full catalogue from database.', 'error');
   } finally {
     if (booksLoadingEl) booksLoadingEl.classList.add('hidden');
   }
+}
+
+/* ── Catalogue Health & Recovery Manager ────────────────────── */
+async function checkCatalogueHealth() {
+  if (!state.defaultBooks || state.defaultBooks.length === 0) {
+    try {
+      const res = await fetch('/products.json');
+      const data = await res.json();
+      if (data && Array.isArray(data.series)) {
+        state.defaultBooks = [];
+        data.series.forEach(s => {
+          if (Array.isArray(s.books)) {
+            s.books.forEach((b, idx) => {
+              state.defaultBooks.push({
+                ...b,
+                seriesId: s.id,
+                seriesLabel: s.label,
+                seriesColor: s.color,
+                orderIndex: idx + 1,
+                isPublished: true,
+              });
+            });
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Could not load products.json reference:', e);
+    }
+  }
+
+  if (state.defaultBooks && state.defaultBooks.length > 0) {
+    const existingIds = new Set(state.books.map(b => b.id));
+    state.missingBooks = state.defaultBooks.filter(db => !existingIds.has(db.id));
+
+    if (openRecoveryBtn && recoveryCountBadge) {
+      if (state.missingBooks.length > 0) {
+        recoveryCountBadge.textContent = state.missingBooks.length;
+        openRecoveryBtn.classList.remove('hidden');
+      } else {
+        openRecoveryBtn.classList.add('hidden');
+      }
+    }
+  }
+}
+
+function openRecoveryModal() {
+  if (!recoveryModal) return;
+  renderRecoveryModalList();
+  recoveryModal.classList.remove('hidden');
+}
+
+function renderRecoveryModalList() {
+  if (!recoveryItemsList || !recoveryEmptyState || !recoveryListContainer) return;
+
+  if (state.missingBooks.length === 0) {
+    recoveryEmptyState.classList.remove('hidden');
+    recoveryListContainer.classList.add('hidden');
+    return;
+  }
+
+  recoveryEmptyState.classList.add('hidden');
+  recoveryListContainer.classList.remove('hidden');
+
+  const foundText = document.getElementById('recovery-found-text');
+  if (foundText) {
+    foundText.textContent = `${state.missingBooks.length} missing curriculum title${state.missingBooks.length === 1 ? '' : 's'} available to restore:`;
+  }
+
+  recoveryItemsList.innerHTML = '';
+  state.missingBooks.forEach(book => {
+    const card = document.createElement('div');
+    card.className = 'recovery-item-card';
+    card.innerHTML = `
+      <div class="recovery-item-left">
+        <img class="recovery-item-thumb" src="${escapeHtml(book.image || '/assets/placeholder-cover.svg')}" alt="${escapeHtml(book.title)}" onerror="this.onerror=null; this.src='/assets/placeholder-cover.svg'">
+        <div class="recovery-item-meta">
+          <span class="recovery-item-title">${escapeHtml(book.title)}${book.subtitle ? ' — ' + escapeHtml(book.subtitle) : ''}</span>
+          <span class="recovery-item-sub">${escapeHtml(book.seriesLabel || book.seriesId)} • ID: <code>${escapeHtml(book.id)}</code></span>
+        </div>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm restore-single-btn" data-id="${escapeHtml(book.id)}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+        <span>Restore</span>
+      </button>
+    `;
+
+    card.querySelector('.restore-single-btn').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="btn-spinner" style="width:12px;height:12px;"></span> Restoring...';
+      try {
+        await apiRequest('/api/cms/books', {
+          method: 'POST',
+          body: JSON.stringify(book),
+        });
+        showToast(`Restored "${book.title}" to catalogue!`, 'success');
+        await loadCatalogue();
+        renderRecoveryModalList();
+      } catch (err) {
+        showToast(err.message || 'Failed to restore book.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = 'Restore';
+      }
+    });
+
+    recoveryItemsList.appendChild(card);
+  });
+}
+
+if (openRecoveryBtn) {
+  openRecoveryBtn.addEventListener('click', openRecoveryModal);
+}
+
+if (restoreAllMissingBtn) {
+  restoreAllMissingBtn.addEventListener('click', async () => {
+    if (state.missingBooks.length === 0) return;
+    restoreAllMissingBtn.disabled = true;
+    restoreAllMissingBtn.textContent = 'Restoring All...';
+
+    try {
+      for (const book of state.missingBooks) {
+        await apiRequest('/api/cms/books', {
+          method: 'POST',
+          body: JSON.stringify(book),
+        }).catch(err => console.warn('Restore book failed:', book.id, err));
+      }
+      showToast('All missing catalogue books restored successfully!', 'success');
+      closeModal('recovery-modal');
+      await loadCatalogue();
+    } catch (err) {
+      showToast(err.message || 'Failed to restore all books.', 'error');
+    } finally {
+      restoreAllMissingBtn.disabled = false;
+      restoreAllMissingBtn.textContent = 'Restore All Missing';
+    }
+  });
 }
 
 async function fallbackLocalSeed() {
@@ -807,11 +969,11 @@ function renderBooksGrid() {
 
     card.innerHTML = `
       <div class="book-admin-header">
-        <img class="book-admin-cover" src="${escapeHtml(book.image || '/assets/placeholder-cover.svg')}" alt="${escapeHtml(book.title)}" loading="lazy" onerror="this.src='/assets/placeholder-cover.svg'">
+        <img class="book-admin-cover" src="${escapeHtml(book.image || '/assets/placeholder-cover.svg')}" alt="${escapeHtml(book.title)}" loading="lazy" onerror="this.onerror=null; this.src='/assets/placeholder-cover.svg'">
         <div class="book-admin-meta">
           <span class="book-series-pill" style="background:${seriesColor}">${escapeHtml(seriesLabel)}</span>
           <h4 class="book-admin-title" title="${escapeHtml(book.title)}">${escapeHtml(book.title)}</h4>
-          ${book.subtitle ? `<span class="book-admin-subtitle">${escapeHtml(book.subtitle)}</span>` : ''}
+          <span class="book-admin-subtitle">${book.subtitle ? escapeHtml(book.subtitle) : '&nbsp;'}</span>
           <span class="book-admin-id-tag">ID: ${escapeHtml(book.id)}</span>
         </div>
       </div>
@@ -957,12 +1119,40 @@ function openBookModal(mode = 'create', bookId = null) {
 
 function updateCoverPreview(url) {
   if (!bookCoverPreview) return;
-  bookCoverPreview.src = url || '/assets/placeholder-cover.svg';
+  const clean = (url || '').trim();
+  if (clean && clean !== '/assets/placeholder-cover.svg') {
+    bookCoverPreview.src = clean;
+    if (clearCoverBtn) clearCoverBtn.classList.remove('hidden');
+  } else {
+    bookCoverPreview.src = '/assets/placeholder-cover.svg';
+    if (clearCoverBtn) clearCoverBtn.classList.add('hidden');
+  }
 }
 
 if (bookFieldImage) {
   bookFieldImage.addEventListener('input', (e) => {
     updateCoverPreview(e.target.value);
+  });
+}
+
+if (clearCoverBtn) {
+  clearCoverBtn.addEventListener('click', () => {
+    if (bookFieldImage) bookFieldImage.value = '';
+    updateCoverPreview('');
+  });
+}
+
+if (uploadCoverDirectBtn) {
+  uploadCoverDirectBtn.addEventListener('click', () => {
+    // When direct upload completes, set the book's cover image automatically
+    state.uploadTargetCallback = (uploadedUrl) => {
+      if (bookFieldImage) {
+        bookFieldImage.value = uploadedUrl;
+        updateCoverPreview(uploadedUrl);
+      }
+      showToast('Cover updated with uploaded asset!', 'success');
+    };
+    openUploadModal();
   });
 }
 
@@ -1352,6 +1542,10 @@ function resetUploadState() {
   if (uploadFileInput) uploadFileInput.value = '';
   if (uploadDropzone) uploadDropzone.classList.remove('hidden');
   if (uploadPreviewContainer) uploadPreviewContainer.classList.add('hidden');
+  if (uploadOverrideRow) uploadOverrideRow.classList.add('hidden');
+  if (uploadOverrideCheckbox) uploadOverrideCheckbox.checked = false;
+  if (uploadPreviewDims) uploadPreviewDims.textContent = '-- × -- px';
+  if (uploadPreviewFormat) uploadPreviewFormat.textContent = 'IMAGE';
   if (startUploadBtn) startUploadBtn.disabled = true;
 }
 
@@ -1390,6 +1584,91 @@ if (uploadRemoveFileBtn) {
   uploadRemoveFileBtn.addEventListener('click', resetUploadState);
 }
 
+if (uploadOverrideCheckbox) {
+  uploadOverrideCheckbox.addEventListener('change', (e) => {
+    if (startUploadBtn) {
+      startUploadBtn.disabled = !e.target.checked;
+    }
+  });
+}
+
+/* ── Web Optimization Health Inspector ─────────────────────── */
+function inspectImageOptimization(file, dataUrl) {
+  const ext = (file.name.split('.').pop() || 'IMG').toUpperCase();
+  const mimeFormat = file.type ? file.type.replace('image/', '').toUpperCase() : ext;
+  if (uploadPreviewFormat) {
+    uploadPreviewFormat.textContent = mimeFormat;
+  }
+
+  const img = new Image();
+  img.onload = () => {
+    const width = img.naturalWidth;
+    const height = img.naturalHeight;
+
+    if (uploadPreviewDims) {
+      uploadPreviewDims.textContent = `${width} × ${height} px`;
+    }
+
+    const sizeKB = file.size / 1024;
+    const sizeMB = sizeKB / 1024;
+
+    if (uploadValidationBanner) {
+      uploadValidationBanner.className = 'upload-validation-banner';
+
+      if (sizeMB > 4) {
+        // Exceeds serverless function payload threshold
+        uploadValidationBanner.classList.add('validation-danger');
+        if (uploadValidationIcon) uploadValidationIcon.textContent = '✕';
+        if (uploadValidationTitle) uploadValidationTitle.textContent = 'File Exceeds 4 MB Limit';
+        if (uploadValidationDesc) uploadValidationDesc.textContent = `Asset is ${sizeMB.toFixed(1)} MB (${width}×${height}px). Serverless upload threshold is 4 MB. Please export a compressed WebP or JPEG under 1600px width.`;
+        if (uploadOverrideRow) uploadOverrideRow.classList.add('hidden');
+        if (startUploadBtn) startUploadBtn.disabled = true;
+      } else if (sizeMB > 1.8) {
+        // Heavy asset (> 1.8MB) - require admin override confirmation
+        uploadValidationBanner.classList.add('validation-warning');
+        if (uploadValidationIcon) uploadValidationIcon.textContent = '⚠️';
+        if (uploadValidationTitle) uploadValidationTitle.textContent = 'Heavy Asset Warning';
+        if (uploadValidationDesc) uploadValidationDesc.textContent = `Asset is ${sizeMB.toFixed(1)} MB (${width}×${height}px). Recommended web size is under 600 KB. High-res imagery may slow down mobile load times.`;
+        if (uploadOverrideRow) {
+          uploadOverrideRow.classList.remove('hidden');
+          if (uploadOverrideCheckbox) uploadOverrideCheckbox.checked = false;
+        }
+        if (startUploadBtn) startUploadBtn.disabled = true;
+      } else if (sizeKB > 600 || width > 2000) {
+        // Moderate size (600KB - 1.8MB)
+        uploadValidationBanner.classList.add('validation-warning');
+        if (uploadValidationIcon) uploadValidationIcon.textContent = '⚠️';
+        if (uploadValidationTitle) uploadValidationTitle.textContent = 'Optimization Notice';
+        if (uploadValidationDesc) uploadValidationDesc.textContent = `Asset is ${sizeKB.toFixed(0)} KB (${width}×${height}px). Acceptable, but converting to WebP under 500 KB will deliver faster mobile performance.`;
+        if (uploadOverrideRow) uploadOverrideRow.classList.add('hidden');
+        if (startUploadBtn) startUploadBtn.disabled = false;
+      } else {
+        // Optimal asset (<= 600KB)
+        uploadValidationBanner.classList.add('validation-optimal');
+        if (uploadValidationIcon) uploadValidationIcon.textContent = '✓';
+        if (uploadValidationTitle) uploadValidationTitle.textContent = 'Web-Optimized Asset';
+        if (uploadValidationDesc) uploadValidationDesc.textContent = `Optimal: ${sizeKB.toFixed(0)} KB (${width}×${height}px, ${mimeFormat}). Ideal file weight for fast rendering across all networks.`;
+        if (uploadOverrideRow) uploadOverrideRow.classList.add('hidden');
+        if (startUploadBtn) startUploadBtn.disabled = false;
+      }
+    }
+  };
+
+  img.onerror = () => {
+    if (uploadPreviewDims) uploadPreviewDims.textContent = 'Vector / SVG';
+    if (uploadValidationBanner) {
+      uploadValidationBanner.className = 'upload-validation-banner validation-optimal';
+      if (uploadValidationIcon) uploadValidationIcon.textContent = '✓';
+      if (uploadValidationTitle) uploadValidationTitle.textContent = 'Vector Asset Detected';
+      if (uploadValidationDesc) uploadValidationDesc.textContent = 'SVG assets are infinitely scalable and lightweight.';
+    }
+    if (uploadOverrideRow) uploadOverrideRow.classList.add('hidden');
+    if (startUploadBtn) startUploadBtn.disabled = false;
+  };
+
+  img.src = dataUrl;
+}
+
 function handleFileSelected(file) {
   if (!file) return;
   if (!file.type.startsWith('image/')) {
@@ -1418,7 +1697,8 @@ function handleFileSelected(file) {
 
     if (uploadDropzone) uploadDropzone.classList.add('hidden');
     if (uploadPreviewContainer) uploadPreviewContainer.classList.remove('hidden');
-    if (startUploadBtn) startUploadBtn.disabled = false;
+
+    inspectImageOptimization(file, e.target.result);
   };
   reader.readAsDataURL(file);
 }
@@ -1435,7 +1715,7 @@ if (startUploadBtn) {
     startUploadBtn.disabled = true;
 
     try {
-      await apiRequest('/api/cms/media', {
+      const res = await apiRequest('/api/cms/media', {
         method: 'POST',
         body: JSON.stringify({
           filename: state.uploadFileData.filename,
@@ -1444,8 +1724,15 @@ if (startUploadBtn) {
         }),
       });
 
-      showToast('Media uploaded to Vercel Blob successfully!', 'success');
+      showToast('Media uploaded successfully!', 'success');
       closeModal('upload-modal');
+
+      const uploadedUrl = res && res.media && res.media.url ? res.media.url : null;
+      if (typeof state.uploadTargetCallback === 'function' && uploadedUrl) {
+        state.uploadTargetCallback(uploadedUrl);
+        state.uploadTargetCallback = null;
+      }
+
       resetUploadState();
       await loadMedia();
     } catch (err) {
@@ -1540,6 +1827,7 @@ if (confirmDeleteBtn) {
     confirmDeleteBtn.disabled = true;
 
     try {
+      const deletedBookSnapshot = type === 'book' ? state.books.find(b => b.id === id) : null;
       const endpoint = type === 'book'
         ? `/api/cms/books?id=${encodeURIComponent(id)}`
         : type === 'series'
@@ -1553,7 +1841,24 @@ if (confirmDeleteBtn) {
       await apiRequest(endpoint, { method: 'DELETE' });
 
       closeModal('delete-modal');
-      showToast(`Deleted "${title}" successfully.`, 'success');
+
+      if (type === 'book' && deletedBookSnapshot) {
+        showUndoBar({
+          type: 'book',
+          title,
+          data: deletedBookSnapshot,
+          restoreFn: async () => {
+            await apiRequest('/api/cms/books', {
+              method: 'POST',
+              body: JSON.stringify(deletedBookSnapshot),
+            });
+            await loadCatalogue();
+            showToast(`Restored "${title}" to catalogue!`, 'success');
+          }
+        });
+      } else {
+        showToast(`Deleted "${title}" successfully.`, 'success');
+      }
 
       if (type === 'media') {
         await loadMedia();
@@ -1574,6 +1879,77 @@ if (confirmDeleteBtn) {
       state.itemToDelete = null;
     }
   });
+}
+
+/* ── Floating Undo System ──────────────────────────────────── */
+function showUndoBar(action) {
+  if (!cmsUndoBar) {
+    showToast(`Deleted "${action.title}".`, 'info');
+    return;
+  }
+
+  if (state.undoTimeoutId) clearTimeout(state.undoTimeoutId);
+  if (state.undoIntervalId) clearInterval(state.undoIntervalId);
+
+  state.lastDeleted = action;
+  if (undoMessage) undoMessage.textContent = `Deleted "${action.title}"`;
+
+  let remaining = 10;
+  if (undoTimerBadge) undoTimerBadge.textContent = `${remaining}s`;
+
+  if (undoProgressBar) {
+    undoProgressBar.style.transition = 'none';
+    undoProgressBar.style.width = '100%';
+    setTimeout(() => {
+      undoProgressBar.style.transition = 'width 10s linear';
+      undoProgressBar.style.width = '0%';
+    }, 50);
+  }
+
+  cmsUndoBar.classList.remove('hidden');
+
+  state.undoIntervalId = setInterval(() => {
+    remaining -= 1;
+    if (undoTimerBadge) undoTimerBadge.textContent = `${remaining}s`;
+    if (remaining <= 0) {
+      hideUndoBar();
+    }
+  }, 1000);
+
+  state.undoTimeoutId = setTimeout(() => {
+    hideUndoBar();
+  }, 10000);
+}
+
+function hideUndoBar() {
+  if (cmsUndoBar) cmsUndoBar.classList.add('hidden');
+  if (state.undoTimeoutId) {
+    clearTimeout(state.undoTimeoutId);
+    state.undoTimeoutId = null;
+  }
+  if (state.undoIntervalId) {
+    clearInterval(state.undoIntervalId);
+    state.undoIntervalId = null;
+  }
+}
+
+if (undoActionBtn) {
+  undoActionBtn.addEventListener('click', async () => {
+    if (state.lastDeleted && typeof state.lastDeleted.restoreFn === 'function') {
+      const fn = state.lastDeleted.restoreFn;
+      hideUndoBar();
+      state.lastDeleted = null;
+      try {
+        await fn();
+      } catch (err) {
+        showToast(err.message || 'Could not restore item.', 'error');
+      }
+    }
+  });
+}
+
+if (undoDismissBtn) {
+  undoDismissBtn.addEventListener('click', hideUndoBar);
 }
 
 /* ── Global Modal Close Handlers ───────────────────────────── */

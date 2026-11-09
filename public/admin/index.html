@@ -15,6 +15,23 @@
   <!-- ── Toast Notifications ───────────────────────────────── -->
   <div id="cms-toast" class="cms-toast" role="alert" aria-live="polite"></div>
 
+  <!-- ── Floating Undo Action Bar ────────────────────────────── -->
+  <div id="cms-undo-bar" class="cms-undo-bar hidden" role="alert" aria-live="assertive">
+    <div class="undo-content">
+      <span class="undo-icon">🗑️</span>
+      <span id="undo-message" class="undo-message">Item deleted.</span>
+    </div>
+    <div class="undo-actions">
+      <button type="button" id="undo-action-btn" class="btn-undo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+        <span>Undo</span>
+        <span id="undo-timer-badge" class="undo-timer">10s</span>
+      </button>
+      <button type="button" id="undo-dismiss-btn" class="undo-dismiss" aria-label="Dismiss">&times;</button>
+    </div>
+    <div id="undo-progress-bar" class="undo-progress-bar"></div>
+  </div>
+
   <!-- ── 1. LOGIN SCREEN (Shown if unauthenticated) ────────── -->
   <div id="login-view" class="login-view active">
     <div class="login-bg-glow"></div>
@@ -445,8 +462,15 @@
 
           <!-- Series Filter Pills & Search Bar -->
           <div class="catalogue-toolbar">
-            <div id="series-filter-pills" class="filter-pills">
-              <!-- Dynamically populated series pills -->
+            <div class="catalogue-toolbar-top">
+              <div id="series-filter-pills" class="filter-pills">
+                <!-- Dynamically populated series pills -->
+              </div>
+              <button type="button" id="open-recovery-btn" class="btn-recovery-pill hidden" title="Catalogue Recovery: restore accidentally deleted or missing curriculum books">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                <span>Recover Books</span>
+                <span id="recovery-count-badge" class="recovery-badge">0</span>
+              </button>
             </div>
 
             <div class="catalogue-search-row">
@@ -950,22 +974,31 @@
           </div>
         </div>
 
-        <div class="modal-grid-2">
-          <div class="form-field">
-            <div class="label-with-action">
-              <label for="book-field-image">Cover Image Path / URL *</label>
-              <button type="button" id="browse-media-for-book-btn" class="btn-text-action">🖼️ Browse Media</button>
+        <!-- Cohesive Cover Asset Selector & Direct Uploader -->
+        <div class="form-field full cover-asset-section">
+          <div class="cover-asset-header">
+            <label for="book-field-image">Book Cover Imagery *</label>
+            <div class="cover-asset-actions">
+              <button type="button" id="upload-cover-direct-btn" class="btn-text-action accent">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                <span>Upload from Computer</span>
+              </button>
+              <button type="button" id="browse-media-for-book-btn" class="btn-text-action">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                <span>Browse Library</span>
+              </button>
             </div>
-            <div class="input-with-preview">
-              <input type="text" id="book-field-image" placeholder="/assets/placeholder-cover.svg" required>
-            </div>
-            <small class="field-hint">Static path in <code>/assets/Resource/</code> or external image URL.</small>
           </div>
-
-          <div class="form-field cover-preview-wrap">
-            <label>Cover Preview</label>
-            <div class="cover-preview-box">
-              <img id="book-cover-preview" src="/assets/placeholder-cover.svg" alt="Cover preview">
+          <div class="cover-asset-body">
+            <div class="cover-thumb-preview" id="cover-thumb-preview-wrap">
+              <img id="book-cover-preview" src="/assets/placeholder-cover.svg" alt="Cover preview" onerror="this.onerror=null; this.src='/assets/placeholder-cover.svg'">
+            </div>
+            <div class="cover-asset-inputs">
+              <div class="cover-input-row">
+                <input type="text" id="book-field-image" placeholder="/assets/Resource/Grade 1 Cover.jpg or https://..." required>
+                <button type="button" id="clear-cover-btn" class="btn-subtle btn-sm hidden" title="Clear image path">Clear</button>
+              </div>
+              <small class="field-hint">Upload directly from your computer to Vercel Blob cloud, or pick from repository assets.</small>
             </div>
           </div>
         </div>
@@ -1222,6 +1255,8 @@
         </div>
       </div>
     </div>
+  </div>
+
   <!-- ── MODAL: ADD / EDIT FAQ ─────────────────────────────── -->
   <div id="faq-modal" class="cms-modal-backdrop hidden" role="dialog" aria-modal="true">
     <div class="cms-modal-box modal-md">
@@ -1272,6 +1307,38 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ── MODAL: CATALOGUE RECOVERY & UNDO ─────────────────────── -->
+  <div id="recovery-modal" class="cms-modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="cms-modal-box modal-md">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>Catalogue Recovery</h3>
+          <p class="modal-subtitle">Restore accidentally deleted or missing curriculum books with one click.</p>
+        </div>
+        <button type="button" class="modal-close-btn" data-close-modal="recovery-modal" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="recovery-modal-body">
+        <div id="recovery-empty-state" class="recovery-empty hidden">
+          <div class="recovery-check-icon">✓</div>
+          <h4>All standard catalogue books are intact</h4>
+          <p>There are no missing curriculum titles or recently deleted items detected in your database.</p>
+        </div>
+        <div id="recovery-list-container" class="recovery-list-container">
+          <div class="recovery-list-header">
+            <span id="recovery-found-text">Missing books detected:</span>
+            <button type="button" id="restore-all-missing-btn" class="btn btn-primary btn-sm">Restore All Missing</button>
+          </div>
+          <div id="recovery-items-list" class="recovery-items-list">
+            <!-- Populated dynamically by admin.js -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal="recovery-modal">Close</button>
+      </div>
     </div>
   </div>
 

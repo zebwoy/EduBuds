@@ -767,14 +767,7 @@ function updatePageFromSeries(seriesData) {
       numEl.dataset.count = totalSeries;
       numEl.textContent   = totalSeries;
     }
-    if (labEl) labEl.textContent = totalSeries === 1 ? 'Book series' : 'Book series';
-  }
-  // Update total books count in stat 3 slot if it exists
-  if (statItems[2]) {
-    const numEl = statItems[2].querySelector('.stat-num');
-    if (numEl && parseInt(numEl.dataset.count, 10) !== totalBooks) {
-      numEl.dataset.count = totalBooks;
-    }
+    if (labEl) labEl.textContent = 'Book series';
   }
 
   /* 2 — Trust pills: update series count pill --------------------- */
