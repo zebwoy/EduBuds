@@ -295,7 +295,10 @@ const PRODUCTS_DATA = {
   async function syncProductsFromApi() {
     try {
       const res = await fetch('/api/products?_t=' + Date.now(), { cache: 'no-cache' });
-      if (!res.ok) return;
+      if (!res.ok) {
+        console.warn('[EduBuds] /api/products responded with status:', res.status);
+        return;
+      }
       const json = await res.json();
       if (json && Array.isArray(json.series) && json.series.length > 0) {
         series = json.series;
@@ -307,8 +310,8 @@ const PRODUCTS_DATA = {
         // Cascade series data to rest of page
         updatePageFromSeries(series);
       }
-    } catch {
-      // Offline fallback: series already rendered
+    } catch (err) {
+      console.warn('[EduBuds] Could not sync products from API, keeping offline catalogue:', err);
     }
   }
 
