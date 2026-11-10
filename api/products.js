@@ -28,7 +28,7 @@ export default async function handler(req, res) {
         SELECT id, series_id, title, subtitle, image, tags, description,
                whatsapp_message as "whatsappMessage", is_published, order_index
         FROM books
-        WHERE is_published = true
+        WHERE COALESCE(is_published, true) = true
         ORDER BY order_index ASC, id ASC
       `;
 
@@ -40,8 +40,8 @@ export default async function handler(req, res) {
           .map(({ series_id, ...book }) => book)
       }));
 
-      // Cache for 1 hour on Vercel Edge / Cloudflare
-      res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+      // Rapid edge revalidation (30s edge, 60s stale) so CMS edits sync almost immediately
+      res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=60');
       return res.status(200).json({ series: seriesMap });
     }
   } catch (dbErr) {
@@ -55,7 +55,7 @@ export default async function handler(req, res) {
     const fileContent = await fs.readFile(jsonPath, 'utf8');
     const data = JSON.parse(fileContent);
 
-    res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=60');
     return res.status(200).json(data);
   } catch (err) {
     console.error('[Products API] Error reading products fallback:', err);

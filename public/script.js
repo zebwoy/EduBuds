@@ -14,7 +14,7 @@ let CONTACT_EMAIL = 'support@edubuds.in';
 /* ── Remote Settings Loader ─────────────────────────────── */
 async function loadRemoteSettings() {
   try {
-    const res = await fetch('/api/settings');
+    const res = await fetch('/api/settings?_t=' + Date.now(), { cache: 'no-cache' });
     if (!res.ok) return;
     const data = await res.json();
     if (data.whatsapp_number && String(data.whatsapp_number).trim()) {
@@ -294,7 +294,7 @@ const PRODUCTS_DATA = {
 
   async function syncProductsFromApi() {
     try {
-      const res = await fetch('/api/products');
+      const res = await fetch('/api/products?_t=' + Date.now(), { cache: 'no-cache' });
       if (!res.ok) return;
       const json = await res.json();
       if (json && Array.isArray(json.series) && json.series.length > 0) {
@@ -610,7 +610,7 @@ function whatsappIcon() {
   // Background fetch live FAQs from /api/faqs
   async function syncFaqsFromApi() {
     try {
-      const res = await fetch('/api/faqs');
+      const res = await fetch('/api/faqs?_t=' + Date.now(), { cache: 'no-cache' });
       if (!res.ok) return;
       const json = await res.json();
       if (!json || !Array.isArray(json.faqs) || json.faqs.length === 0) return;
@@ -660,7 +660,7 @@ function whatsappIcon() {
 /* ── Dynamic Site Content Hydration ───────────────────────── */
 async function syncContentFromApi() {
   try {
-    const res = await fetch('/api/content');
+    const res = await fetch('/api/content?_t=' + Date.now(), { cache: 'no-cache' });
     if (!res.ok) return;
     const json = await res.json();
     if (!json || !json.content) return;
@@ -721,26 +721,68 @@ async function syncContentFromApi() {
 
     // 4. Curriculum
     if (c.curriculum) {
+      const curEye = document.querySelector('#curriculum .eyebrow');
+      if (curEye && c.curriculum.eyebrow) curEye.innerHTML = `<span class="mark">✳</span> ${escapeHTML(c.curriculum.eyebrow)}`;
       const curHead = document.querySelector('#curriculum-heading');
       if (curHead && c.curriculum.heading) curHead.innerHTML = c.curriculum.heading;
       const curLead = document.querySelector('#curriculum .section-head > p');
       if (curLead && c.curriculum.lead) curLead.textContent = c.curriculum.lead;
+
+      if (Array.isArray(c.curriculum.strands)) {
+        const strandCards = document.querySelectorAll('.strand-card');
+        strandCards.forEach((card, idx) => {
+          const st = c.curriculum.strands[idx];
+          if (!st) return;
+          const nameEl = card.querySelector('.strand-name');
+          const descEl = card.querySelector('.strand-desc');
+          if (nameEl && st.name) nameEl.textContent = st.name;
+          if (descEl && st.desc) descEl.textContent = st.desc;
+        });
+      }
     }
 
-    // 5. Approach
+    // 5. Approach (Our Educational Purpose)
     if (c.approach) {
+      const appEye = document.querySelector('.approach-copy .eyebrow');
+      if (appEye && c.approach.eyebrow) appEye.innerHTML = `<span class="mark">✳</span> ${escapeHTML(c.approach.eyebrow)}`;
       const appHead = document.querySelector('#approach-heading');
       if (appHead && c.approach.heading) appHead.innerHTML = c.approach.heading;
       const appLead = document.querySelector('.approach-copy > p');
       if (appLead && c.approach.lead) appLead.textContent = c.approach.lead;
+
+      if (Array.isArray(c.approach.pillars)) {
+        const steps = document.querySelectorAll('.pathway-step');
+        steps.forEach((step, idx) => {
+          const pil = c.approach.pillars[idx];
+          if (!pil) return;
+          const titleEl = step.querySelector('.step-title');
+          const descEl = step.querySelector('.step-desc');
+          if (titleEl && pil.title) titleEl.textContent = pil.title;
+          if (descEl && pil.desc) descEl.textContent = pil.desc;
+        });
+      }
     }
 
-    // 6. Parents
+    // 6. Parents & Educators
     if (c.parents) {
+      const parEye = document.querySelector('.parent-copy .eyebrow');
+      if (parEye && c.parents.eyebrow) parEye.innerHTML = `<span class="mark">✳</span> ${escapeHTML(c.parents.eyebrow)}`;
       const parHead = document.querySelector('#parents-heading');
       if (parHead && c.parents.heading) parHead.innerHTML = c.parents.heading;
       const parLead = document.querySelector('.parent-copy > p');
       if (parLead && c.parents.lead) parLead.textContent = c.parents.lead;
+
+      if (Array.isArray(c.parents.cards)) {
+        const cards = document.querySelectorAll('.parent-card');
+        cards.forEach((card, idx) => {
+          const item = c.parents.cards[idx];
+          if (!item) return;
+          const h3 = card.querySelector('h3');
+          const p = card.querySelector('p');
+          if (h3 && item.title) h3.textContent = item.title;
+          if (p && item.body) p.textContent = item.body;
+        });
+      }
     }
   } catch {
     // Offline resilience: keep static HTML

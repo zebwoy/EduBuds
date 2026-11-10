@@ -59,10 +59,10 @@ export default async function handler(req, res) {
     const faqs = await getAllFaqs(true);
     const result = faqs && faqs.length > 0 ? faqs : DEFAULT_FAQS;
 
-    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
+    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=60');
     return res.status(200).json({ faqs: result });
   } catch (err) {
-    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=60');
     return res.status(200).json({ faqs: DEFAULT_FAQS });
   }
 }

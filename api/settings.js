@@ -31,12 +31,12 @@ export default async function handler(req, res) {
       marquee_messages: dbSettings.marquee_messages ? JSON.parse(dbSettings.marquee_messages) : null,
     };
 
-    // Cache for 5 minutes at Edge, serve stale up to 24 hours while revalidating
-    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
+    // Rapid edge revalidation (30s edge, 60s stale) so CMS settings sync almost immediately
+    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=60');
     return res.status(200).json(settings);
   } catch (err) {
     // If DB is offline or table hasn't been migrated yet, serve defaults gracefully
-    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=60');
     return res.status(200).json(defaults);
   }
 }
