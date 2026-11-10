@@ -926,6 +926,195 @@ function renderSeriesOptionsInBookModal() {
   });
 }
 
+/* ── Dynamic Book Cover Matcher & Reconciler ───────────────── */
+function extractTokens(str) {
+  if (!str) return [];
+  const cleaned = String(str)
+    .toLowerCase()
+    .replace(/^edubuds-\d+-/, '')
+    .replace(/-[a-z0-9]{10,}(\.[a-z0-9]+)?$/i, '')
+    .replace(/\.[a-z0-9]+$/i, '');
+
+  return cleaned
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(t => t.length > 0 && !['edubuds', 'png', 'jpg', 'jpeg', 'webp', 'svg', 'as', 'cover', 'the', 'and', 'for'].includes(t));
+}
+
+function scoreAssetMatch(assetName, book) {
+  const assetTokens = extractTokens(assetName);
+  if (!assetTokens.length) return 0;
+
+  const bookIdTokens = extractTokens(book.id);
+  const bookSubTokens = extractTokens(book.subtitle);
+  const bookTitleTokens = extractTokens(book.title);
+  const allBookTokens = Array.from(new Set([...bookIdTokens, ...bookSubTokens, ...bookTitleTokens]));
+
+  // Strict numeric guard: if asset has number (e.g. "1"), book MUST match that number
+  const assetNumbers = assetTokens.filter(t => /^\d+$/.test(t));
+  const bookNumbers = allBookTokens.filter(t => /^\d+$/.test(t));
+  if (assetNumbers.length > 0 && bookNumbers.length > 0) {
+    const hasCommonNumber = assetNumbers.some(n => bookNumbers.includes(n));
+    if (!hasCommonNumber) return 0;
+  }
+
+  let matchCount = 0;
+  for (const at of assetTokens) {
+    if (allBookTokens.includes(at)) {
+      matchCount += 1;
+    }
+  }
+
+  return matchCount / Math.max(assetTokens.length, 1);
+}
+
+function findBestMatchingBook(assetName) {
+  let bestScore = 0;
+  let bestBook = null;
+
+  for (const book of state.books) {
+    const s = scoreAssetMatch(assetName, book);
+    if (s > bestScore && s >= 0.5) {
+      bestScore = s;
+      bestBook = book;
+    }
+  }
+
+  return bestBook;
+}
+
+function findMatchingAssetForBook(book, mediaList = state.media) {
+  const cloudMedia = (mediaList || []).filter(m => m.isBlob || (m.url && m.url.startsWith('http')));
+  let bestScore = 0;
+  let bestAsset = null;
+
+  for (const asset of cloudMedia) {
+    const s = scoreAssetMatch(asset.name, book);
+    if (s > bestScore && s >= 0.5) {
+      bestScore = s;
+      bestAsset = asset;
+    }
+  }
+
+  return bestAsset;
+}
+
+async function applyCoverToBook(bookId, assetUrl) {
+  try {
+    showToast('Saving cover to database & publishing live...', 'info');
+    const res = await apiRequest('/api/cms/books', {
+      method: 'PUT',
+      body: JSON.stringify({
+        id: bookId,
+        image: assetUrl,
+      }),
+    });
+
+    if (res && res.book) {
+      const idx = state.books.findIndex(b => b.id === bookId);
+      if (idx !== -1) {
+        state.books[idx] = { ...state.books[idx], ...res.book };
+      }
+      renderBooksGrid();
+      showToast(`✓ Cover updated for "${res.book.title} ${res.book.subtitle || ''}"!`, 'success', 5000);
+      return res.book;
+    }
+  } catch (err) {
+    console.error('[CMS] Failed to apply cover to book:', err);
+    showToast(err.message || 'Failed to update book cover.', 'error');
+    throw err;
+  }
+}
+
+async function reconcileAllCloudCovers() {
+  const unlinkedBooks = state.books.filter(b => {
+    const img = (b.image || '').trim();
+    return !img || img.startsWith('/assets/Resource/') || img.includes('placeholder-cover');
+  });
+
+  if (!unlinkedBooks.length) {
+    showToast('All catalogue books already have active cloud covers!', 'info');
+    return;
+  }
+
+  const matches = [];
+  for (const b of unlinkedBooks) {
+    const asset = findMatchingAssetForBook(b);
+    if (asset) {
+      matches.push({ book: b, asset });
+    }
+  }
+
+  if (matches.length === 0) {
+    showToast('No matching cloud assets found in Media Library for unlinked books.', 'info');
+    return;
+  }
+
+  const confirmMsg = `Found ${matches.length} matching cloud asset(s):\n\n` +
+    matches.map(m => `• "${m.book.title} ${m.book.subtitle || ''}" ➔ ${m.asset.name}`).join('\n') +
+    `\n\nApply and publish these covers to the live site now?`;
+
+  if (!confirm(confirmMsg)) return;
+
+  showToast(`Linking ${matches.length} book cover(s)...`, 'info');
+  let successCount = 0;
+
+  for (const m of matches) {
+    try {
+      await applyCoverToBook(m.book.id, m.asset.url);
+      successCount += 1;
+    } catch (err) {
+      console.error(`Failed to link ${m.book.id}:`, err);
+    }
+  }
+
+  showToast(`✓ Successfully linked ${successCount} cover(s) to the live catalogue!`, 'success', 5000);
+}
+
+function openAssignMediaModal(assetUrl, assetName) {
+  const modal = document.getElementById('assign-media-modal');
+  const targetUrlInput = document.getElementById('assign-target-url');
+  const previewImg = document.getElementById('assign-preview-img');
+  const previewName = document.getElementById('assign-preview-name');
+  const previewUrl = document.getElementById('assign-preview-url');
+  const select = document.getElementById('assign-target-book');
+
+  if (!modal || !select) return;
+
+  targetUrlInput.value = assetUrl;
+  if (previewImg) previewImg.src = assetUrl;
+  if (previewName) previewName.textContent = assetName || 'Media Asset';
+  if (previewUrl) previewUrl.textContent = assetUrl;
+
+  select.innerHTML = '<option value="" disabled selected>Choose a curriculum title...</option>';
+
+  const matchedBook = findBestMatchingBook(assetName);
+
+  state.series.forEach(s => {
+    const seriesBooks = state.books.filter(b => (b.seriesId || b.series_id) === s.id);
+    if (!seriesBooks.length) return;
+
+    const group = document.createElement('optgroup');
+    group.label = s.label;
+
+    seriesBooks.forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b.id;
+      const fullTitle = `${b.title}${b.subtitle ? ' - ' + b.subtitle : ''}`;
+      opt.textContent = fullTitle;
+      if (matchedBook && matchedBook.id === b.id) {
+        opt.selected = true;
+      }
+      group.appendChild(opt);
+    });
+
+    select.appendChild(group);
+  });
+
+  modal.classList.remove('hidden');
+}
+
 /* ── Books Grid Rendering ──────────────────────────────────── */
 function renderBooksGrid() {
   if (!booksGridEl) return;
@@ -963,6 +1152,9 @@ function renderBooksGrid() {
     const seriesColor = seriesObj.color || book.seriesColor || '#0878c9';
     const seriesLabel = seriesObj.label || book.seriesLabel || book.seriesId || 'Curriculum';
 
+    const hasActiveCover = Boolean(book.image && !book.image.startsWith('/assets/Resource/') && !book.image.includes('placeholder-cover'));
+    const matchedAsset = !hasActiveCover ? findMatchingAssetForBook(book) : null;
+
     const card = document.createElement('div');
     card.className = `book-admin-card ${!book.isPublished ? 'draft' : ''}`;
     card.id = `book-card-${book.id}`;
@@ -977,6 +1169,16 @@ function renderBooksGrid() {
           <span class="book-admin-id-tag">ID: ${escapeHtml(book.id)}</span>
         </div>
       </div>
+
+      ${matchedAsset ? `
+        <div class="smart-asset-pill" title="Detected matching cloud cover in Media Library: ${escapeHtml(matchedAsset.name)}">
+          <span class="pill-sparkle">✨</span>
+          <span class="pill-title">Detected Cloud Asset: <strong>${escapeHtml(matchedAsset.name)}</strong></span>
+          <button type="button" class="btn-quick-link" data-book-id="${escapeHtml(book.id)}" data-url="${escapeHtml(matchedAsset.url)}">
+            1-Click Link
+          </button>
+        </div>
+      ` : ''}
 
       <p class="book-admin-desc">${escapeHtml(book.description || 'No description provided.')}</p>
 
@@ -1008,6 +1210,22 @@ function renderBooksGrid() {
       const bookId = e.target.dataset.id;
       const nextState = e.target.checked;
       await handleToggleBookPublish(bookId, nextState, e.target);
+    });
+  });
+
+  booksGridEl.querySelectorAll('.btn-quick-link').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const bookId = btn.dataset.bookId;
+      const url = btn.dataset.url;
+      btn.disabled = true;
+      btn.textContent = 'Linking...';
+      try {
+        await applyCoverToBook(bookId, url);
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Retry Link';
+      }
     });
   });
 
@@ -1144,13 +1362,21 @@ if (clearCoverBtn) {
 
 if (uploadCoverDirectBtn) {
   uploadCoverDirectBtn.addEventListener('click', () => {
-    // When direct upload completes, set the book's cover image automatically
-    state.uploadTargetCallback = (uploadedUrl) => {
+    // When direct upload completes, set the book's cover image automatically & persist if editing
+    state.uploadTargetCallback = async (uploadedUrl) => {
       if (bookFieldImage) {
         bookFieldImage.value = uploadedUrl;
         updateCoverPreview(uploadedUrl);
       }
-      showToast('Cover updated with uploaded asset!', 'success');
+
+      const currentBookId = bookFieldId ? bookFieldId.value.trim() : null;
+      const mode = bookFieldMode ? bookFieldMode.value : 'create';
+
+      if (mode === 'edit' && currentBookId) {
+        await applyCoverToBook(currentBookId, uploadedUrl);
+      } else {
+        showToast('Cover updated with uploaded asset! Click "Save Book" below to complete.', 'success');
+      }
     };
     openUploadModal();
   });
@@ -1401,6 +1627,7 @@ async function loadMedia() {
     updateBlobBadge(state.hasBlobToken);
     updateMediaCounts();
     renderMediaGallery();
+    renderBooksGrid();
   } catch (err) {
     console.error('[CMS Media] Load error:', err);
     showToast('Failed to scan media assets.', 'error');
@@ -1471,6 +1698,10 @@ function renderMediaGallery() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             <span>Copy URL</span>
           </button>
+          <button type="button" class="assign-cover-btn" data-url="${escapeHtml(item.url)}" data-name="${escapeHtml(item.name)}" title="Assign as curriculum book cover">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span>Assign to Book</span>
+          </button>
           ${item.isBlob ? `
             <button type="button" class="icon-action-btn delete-btn delete-media-btn" data-url="${escapeHtml(item.url)}" title="Delete cloud asset">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -1484,6 +1715,15 @@ function renderMediaGallery() {
       const url = e.currentTarget.dataset.url;
       copyToClipboard(url, 'Asset URL copied to clipboard!');
     });
+
+    const assignBtn = card.querySelector('.assign-cover-btn');
+    if (assignBtn) {
+      assignBtn.addEventListener('click', (e) => {
+        const url = e.currentTarget.dataset.url;
+        const name = e.currentTarget.dataset.name;
+        openAssignMediaModal(url, name);
+      });
+    }
 
     const deleteBtn = card.querySelector('.delete-media-btn');
     if (deleteBtn) {
@@ -1728,9 +1968,20 @@ if (startUploadBtn) {
       closeModal('upload-modal');
 
       const uploadedUrl = res && res.media && res.media.url ? res.media.url : null;
+      const uploadedName = (res && res.media && res.media.name) || state.uploadFileData.filename;
+
       if (typeof state.uploadTargetCallback === 'function' && uploadedUrl) {
-        state.uploadTargetCallback(uploadedUrl);
+        await state.uploadTargetCallback(uploadedUrl);
         state.uploadTargetCallback = null;
+      } else if (uploadedUrl) {
+        // Standalone upload from Media Library: prompt auto-assignment if matched
+        const matched = findBestMatchingBook(uploadedName);
+        if (matched) {
+          setTimeout(() => {
+            openAssignMediaModal(uploadedUrl, uploadedName);
+            showToast(`💡 Auto-detected "${matched.title} ${matched.subtitle || ''}". Click "Assign & Publish" to link.`, 'info', 7000);
+          }, 350);
+        }
       }
 
       resetUploadState();
@@ -1771,13 +2022,21 @@ function renderPickerGallery() {
       <span class="picker-thumb-name">${escapeHtml(item.name)}</span>
     `;
 
-    card.addEventListener('click', () => {
+    card.addEventListener('click', async () => {
       if (bookFieldImage) {
         bookFieldImage.value = item.url;
         updateCoverPreview(item.url);
       }
       closeModal('media-picker-modal');
-      showToast('Cover selected from Media Library!', 'success');
+
+      const currentBookId = bookFieldId ? bookFieldId.value.trim() : null;
+      const mode = bookFieldMode ? bookFieldMode.value : 'create';
+
+      if (mode === 'edit' && currentBookId) {
+        await applyCoverToBook(currentBookId, item.url);
+      } else {
+        showToast('Cover selected from Media Library! Click "Save Book" below to complete.', 'success');
+      }
     });
 
     pickerGalleryGrid.appendChild(card);
@@ -2597,6 +2856,44 @@ async function downloadSubscribersCsv() {
   } finally {
     exportBtn.disabled = false;
   }
+}
+
+/* ── Reconcile & Assign Media Listeners ─────────────────────── */
+const reconcileMediaBtn = document.getElementById('reconcile-media-btn');
+if (reconcileMediaBtn) {
+  reconcileMediaBtn.addEventListener('click', reconcileAllCloudCovers);
+}
+
+const assignMediaForm = document.getElementById('assign-media-form');
+if (assignMediaForm) {
+  assignMediaForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const targetUrl = document.getElementById('assign-target-url')?.value;
+    const bookId = document.getElementById('assign-target-book')?.value;
+    const confirmBtn = document.getElementById('confirm-assign-btn');
+
+    if (!targetUrl || !bookId) {
+      showToast('Please select a curriculum book.', 'error');
+      return;
+    }
+
+    const btnText = confirmBtn ? confirmBtn.querySelector('.btn-text') : null;
+    const btnSpinner = confirmBtn ? confirmBtn.querySelector('.btn-spinner') : null;
+    if (btnText) btnText.classList.add('hidden');
+    if (btnSpinner) btnSpinner.classList.remove('hidden');
+    if (confirmBtn) confirmBtn.disabled = true;
+
+    try {
+      await applyCoverToBook(bookId, targetUrl);
+      closeModal('assign-media-modal');
+    } catch (err) {
+      // error toast already shown in applyCoverToBook
+    } finally {
+      if (btnText) btnText.classList.remove('hidden');
+      if (btnSpinner) btnSpinner.classList.add('hidden');
+      if (confirmBtn) confirmBtn.disabled = false;
+    }
+  });
 }
 
 /* ── Boot ──────────────────────────────────────────────────── */

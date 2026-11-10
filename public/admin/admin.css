@@ -1954,6 +1954,131 @@ body.drawer-locked {
   height: 14px;
 }
 
+.assign-cover-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.assign-cover-btn:hover {
+  background: rgba(52, 211, 153, 0.22);
+  border-color: #34d399;
+  color: #6ee7b7;
+}
+.assign-cover-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* ── Smart Asset Matcher Pill on Book Card ── */
+.smart-asset-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(8, 120, 201, 0.15), rgba(168, 85, 247, 0.15));
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  margin: 10px 0 4px 0;
+}
+.smart-asset-pill .pill-sparkle {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+.smart-asset-pill .pill-title {
+  font-size: 0.75rem;
+  color: var(--text-main);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+.smart-asset-pill .pill-title strong {
+  color: #38bdf8;
+  font-weight: 600;
+}
+.smart-asset-pill .btn-quick-link {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #0f172a;
+  background: #38bdf8;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+.smart-asset-pill .btn-quick-link:hover {
+  background: #7dd3fc;
+  transform: scale(1.04);
+}
+
+/* ── Assign Media Modal Box ── */
+.assign-preview-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+.assign-thumb {
+  width: 54px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: #000;
+  border: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+.assign-meta-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+  flex: 1;
+}
+.assign-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a855f7;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+.assign-filename {
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.assign-url-text {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ── Upload Modal Specifics ─────────────────────────────────── */
 .modal-md { max-width: 560px; }
 
