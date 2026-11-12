@@ -569,96 +569,9 @@ function whatsappIcon() {
   </svg>`;
 }
 
-/* ── FAQs Accordion ───────────────────────────────────────── */
-(function initFaqs() {
-  const faqList = $('#faq-list');
-  if (!faqList) return;
-
-  function bindTriggers(container) {
-    const items = container.querySelectorAll('.faq-item');
-    items.forEach(item => {
-      const trigger = item.querySelector('.faq-trigger');
-      if (!trigger || trigger.dataset.bound) return;
-      trigger.dataset.bound = 'true';
-
-      const handleFaqToggle = () => {
-        const isOpen = item.classList.contains('active');
-
-        // Optional: close siblings for clean single-open accordion
-        items.forEach(sibling => {
-          if (sibling !== item) {
-            sibling.classList.remove('active');
-            const sibTrigger = sibling.querySelector('.faq-trigger');
-            if (sibTrigger) sibTrigger.setAttribute('aria-expanded', 'false');
-          }
-        });
-
-        item.classList.toggle('active', !isOpen);
-        trigger.setAttribute('aria-expanded', String(!isOpen));
-      };
-
-      trigger.addEventListener('click', handleFaqToggle);
-      trigger.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handleFaqToggle();
-        }
-      });
-    });
-  }
-
-  // Bind initial static items
-  bindTriggers(faqList);
-
-  // Background fetch live FAQs from /api/faqs
-  async function syncFaqsFromApi() {
-    try {
-      const res = await fetch('/api/faqs?_t=' + Date.now(), { cache: 'no-cache' });
-      if (!res.ok) return;
-      const json = await res.json();
-      if (!json || !Array.isArray(json.faqs) || json.faqs.length === 0) return;
-
-      faqList.innerHTML = '';
-      json.faqs.forEach((faq, idx) => {
-        const article = document.createElement('article');
-        article.className = 'faq-item reveal';
-        article.innerHTML = `
-          <button class="faq-trigger" aria-expanded="false" aria-controls="faq-live-ans-${faq.id || idx}">
-            <span>${escapeHTML(faq.question)}</span>
-            <div class="faq-icon-wrap" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </div>
-          </button>
-          <div class="faq-panel" id="faq-live-ans-${faq.id || idx}">
-            <p>${escapeHTML(faq.answer)}</p>
-          </div>
-        `;
-        faqList.appendChild(article);
-      });
-
-      bindTriggers(faqList);
-      // Re-observe new items for reveal animation
-      faqList.querySelectorAll('.faq-item.reveal').forEach(el => {
-        el.classList.remove('visible');
-        globalRevealObserver.observe(el);
-      });
-    } catch {
-      // Offline fallback: static HTML FAQs remain active
-    }
-  }
-
-  syncFaqsFromApi();
-
-  // Wire FAQ CTA action buttons
-  const faqWaCta = $('#faq-wa-cta');
-  if (faqWaCta) {
-    faqWaCta.href = buildWhatsAppURL('Assalamu Alaikum! I have a question regarding the EduBuds curriculum and book orders.');
-  }
-  const faqMailCta = $('#faq-mail-cta');
-  if (faqMailCta) {
-    faqMailCta.href = `mailto:${CONTACT_EMAIL}`;
-  }
-})();
+/* ── FAQs Accordion ─────────────────────────────────────────
+   Managed independently by /faq.js
+   ─────────────────────────────────────────────────────────── */
 
 /* ── Dynamic Site Content Hydration ───────────────────────── */
 async function syncContentFromApi() {
