@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/admin/admin.css?v=2.4">
+  <link rel="stylesheet" href="/admin/admin.css?v=2.5">
 </head>
 <body class="cms-body">
 
@@ -1262,36 +1262,93 @@
   </div>
 
   <!-- ── MODAL: ASSIGN MEDIA TO BOOK ────────────────────────── -->
-  <div id="assign-media-modal" class="cms-modal-backdrop hidden" role="dialog" aria-modal="true">
-    <div class="cms-modal-box modal-md">
+  <div id="assign-media-modal" class="cms-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="assign-modal-title">
+    <div class="cms-modal-box modal-md assign-modal-box">
+      <!-- Modal Header -->
       <div class="modal-header">
         <div class="modal-title-group">
-          <h3>Assign Cover to Book</h3>
-          <p class="modal-subtitle">Directly link this media asset as the cover of any curriculum book.</p>
+          <div class="modal-title-row">
+            <span class="modal-title-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            </span>
+            <h3 id="assign-modal-title">Assign Cover to Book</h3>
+          </div>
+          <p class="modal-subtitle">Directly link this media asset as the live cover of any curriculum book.</p>
         </div>
         <button type="button" class="modal-close-btn" data-close-modal="assign-media-modal" aria-label="Close modal">&times;</button>
       </div>
 
-      <form id="assign-media-form" class="cms-modal-form">
-        <div class="assign-preview-box">
-          <img id="assign-preview-img" src="/assets/placeholder-cover.svg" alt="Preview" class="assign-thumb">
-          <div class="assign-meta-info">
-            <span class="assign-badge">Cloud Media Asset</span>
-            <strong id="assign-preview-name" class="assign-filename">asset-name.webp</strong>
-            <span id="assign-preview-url" class="assign-url-text">https://...</span>
-          </div>
-        </div>
+      <!-- Modal Form Body -->
+      <form id="assign-media-form" class="modal-form assign-modal-form">
         <input type="hidden" id="assign-target-url" value="">
 
-        <div class="form-group" style="margin-top: 1.25rem;">
-          <label for="assign-target-book" class="form-label">Select Curriculum Book <span class="required">*</span></label>
-          <select id="assign-target-book" class="form-select" required>
-            <option value="" disabled selected>Choose a book to update...</option>
-          </select>
-          <small class="form-hint">Assigning will instantly update the book's cover in the database and publish it to the live site.</small>
+        <!-- Sub-Component 1: Selected Media Asset Source Card -->
+        <div class="assign-asset-card">
+          <div class="assign-asset-thumb-wrap">
+            <img id="assign-preview-img" src="/assets/placeholder-cover.svg" alt="Preview" class="assign-asset-thumb" loading="lazy" onerror="this.src='/assets/placeholder-cover.svg'">
+          </div>
+          <div class="assign-asset-body">
+            <div class="assign-asset-tags">
+              <span class="assign-badge-cloud">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+                Cloud Media Asset
+              </span>
+              <span id="assign-preview-format" class="assign-badge-format">WEBP</span>
+            </div>
+            <strong id="assign-preview-name" class="assign-asset-name" title="Asset filename">asset-name.webp</strong>
+            <div class="assign-asset-url-row">
+              <span id="assign-preview-url" class="assign-asset-url">https://...</span>
+              <button type="button" id="assign-copy-url-btn" class="assign-copy-btn" title="Copy URL">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div class="modal-footer">
+        <!-- Sub-Component 2: Destination Book Selector -->
+        <div class="form-field full">
+          <label for="assign-target-book">
+            Destination Curriculum Book <span class="required" style="color: #f87171;">*</span>
+          </label>
+          <div class="select-wrapper">
+            <select id="assign-target-book" required>
+              <option value="" disabled selected>Select a curriculum title...</option>
+            </select>
+          </div>
+          <small class="field-hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            Selecting a book will immediately link this cover in Neon PostgreSQL and publish it live on <code>edubuds.in</code>.
+          </small>
+        </div>
+
+        <!-- Sub-Component 3: Live Visual Comparison Preview -->
+        <div id="assign-comparison-card" class="assign-comparison-card hidden">
+          <div class="comparison-column">
+            <span class="comparison-header">Current Cover</span>
+            <div class="comparison-thumb-box">
+              <img id="assign-current-cover-img" src="/assets/placeholder-cover.svg" alt="Current Cover" class="comparison-img" onerror="this.src='/assets/placeholder-cover.svg'">
+            </div>
+            <span id="assign-current-cover-title" class="comparison-caption">—</span>
+          </div>
+
+          <div class="comparison-divider">
+            <div class="comparison-arrow-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </div>
+            <span class="comparison-action-label">REPLACING WITH</span>
+          </div>
+
+          <div class="comparison-column highlight">
+            <span class="comparison-header new">New Live Cover</span>
+            <div class="comparison-thumb-box highlight">
+              <img id="assign-new-cover-img" src="/assets/placeholder-cover.svg" alt="New Cover" class="comparison-img" onerror="this.src='/assets/placeholder-cover.svg'">
+            </div>
+            <span id="assign-new-cover-title" class="comparison-caption highlight">This Cloud Asset</span>
+          </div>
+        </div>
+
+        <!-- Sub-Component 4: Modal Actions Footer -->
+        <div class="modal-footer assign-modal-footer">
           <button type="button" class="btn btn-secondary" data-close-modal="assign-media-modal">Cancel</button>
           <button type="submit" id="confirm-assign-btn" class="btn btn-primary">
             <span class="btn-text">Assign & Publish Cover</span>
@@ -1387,6 +1444,6 @@
     </div>
   </div>
 
-  <script src="/admin/admin.js?v=2.4"></script>
+  <script src="/admin/admin.js?v=2.5"></script>
 </body>
 </html>

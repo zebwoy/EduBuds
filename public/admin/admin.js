@@ -1072,12 +1072,47 @@ async function reconcileAllCloudCovers() {
   showToast(`✓ Successfully linked ${successCount} cover(s) to the live catalogue!`, 'success', 5000);
 }
 
+function updateAssignComparisonPreview() {
+  const select = document.getElementById('assign-target-book');
+  const card = document.getElementById('assign-comparison-card');
+  const currImg = document.getElementById('assign-current-cover-img');
+  const currTitle = document.getElementById('assign-current-cover-title');
+  const newImg = document.getElementById('assign-new-cover-img');
+  const newTitle = document.getElementById('assign-new-cover-title');
+  const targetUrl = document.getElementById('assign-target-url')?.value;
+
+  if (!select || !card) return;
+
+  const selectedId = select.value;
+  const book = state.books.find(b => b.id === selectedId);
+
+  if (!book) {
+    card.classList.add('hidden');
+    return;
+  }
+
+  card.classList.remove('hidden');
+  const hasCover = Boolean(book.image && !book.image.startsWith('/assets/Resource/') && !book.image.includes('placeholder-cover'));
+  if (currImg) currImg.src = hasCover ? book.image : '/assets/placeholder-cover.svg';
+  if (currTitle) {
+    currTitle.textContent = hasCover ? 'Active Live Cover' : 'Placeholder (No Cover)';
+    currTitle.className = hasCover ? 'comparison-caption' : 'comparison-caption text-dim';
+  }
+  if (newImg && targetUrl) {
+    newImg.src = targetUrl;
+  }
+  if (newTitle) {
+    newTitle.textContent = 'Will be published live';
+  }
+}
+
 function openAssignMediaModal(assetUrl, assetName) {
   const modal = document.getElementById('assign-media-modal');
   const targetUrlInput = document.getElementById('assign-target-url');
   const previewImg = document.getElementById('assign-preview-img');
   const previewName = document.getElementById('assign-preview-name');
   const previewUrl = document.getElementById('assign-preview-url');
+  const previewFormat = document.getElementById('assign-preview-format');
   const select = document.getElementById('assign-target-book');
 
   if (!modal || !select) return;
@@ -1087,7 +1122,10 @@ function openAssignMediaModal(assetUrl, assetName) {
   if (previewName) previewName.textContent = assetName || 'Media Asset';
   if (previewUrl) previewUrl.textContent = assetUrl;
 
-  select.innerHTML = '<option value="" disabled selected>Choose a curriculum title...</option>';
+  const ext = (assetName ? assetName.split('.').pop() || 'IMG' : 'IMG').toUpperCase();
+  if (previewFormat) previewFormat.textContent = ext;
+
+  select.innerHTML = '<option value="" disabled selected>Select a curriculum title...</option>';
 
   const matchedBook = findBestMatchingBook(assetName);
 
@@ -1112,6 +1150,7 @@ function openAssignMediaModal(assetUrl, assetName) {
     select.appendChild(group);
   });
 
+  updateAssignComparisonPreview();
   modal.classList.remove('hidden');
 }
 
@@ -2893,6 +2932,19 @@ if (assignMediaForm) {
       if (btnSpinner) btnSpinner.classList.add('hidden');
       if (confirmBtn) confirmBtn.disabled = false;
     }
+  });
+}
+
+const assignTargetBookSelect = document.getElementById('assign-target-book');
+if (assignTargetBookSelect) {
+  assignTargetBookSelect.addEventListener('change', updateAssignComparisonPreview);
+}
+
+const assignCopyUrlBtn = document.getElementById('assign-copy-url-btn');
+if (assignCopyUrlBtn) {
+  assignCopyUrlBtn.addEventListener('click', () => {
+    const url = document.getElementById('assign-target-url')?.value;
+    if (url) copyToClipboard(url, 'Asset URL copied to clipboard!');
   });
 }
 
