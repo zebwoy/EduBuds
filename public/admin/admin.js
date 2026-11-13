@@ -37,6 +37,7 @@ const state = {
   mediaSearch: '',
   hasBlobToken: false,
   uploadFileData: null,
+  uploadQueue: [],
   uploadTargetCallback: null,
   itemToDelete: null, // { type: 'book' | 'series' | 'media' | 'faq' | 'subscriber', id: string, title: string }
   lastDeleted: null,
@@ -147,15 +148,18 @@ const mediaGridEl = document.getElementById('media-grid');
 const uploadModal = document.getElementById('upload-modal');
 const uploadDropzone = document.getElementById('upload-dropzone');
 const uploadFileInput = document.getElementById('upload-file-input');
-const uploadPreviewContainer = document.getElementById('upload-preview-container');
-const uploadPreviewImg = document.getElementById('upload-preview-img');
-const uploadPreviewName = document.getElementById('upload-preview-name');
-const uploadPreviewSize = document.getElementById('upload-preview-size');
-const uploadRemoveFileBtn = document.getElementById('upload-remove-file-btn');
+const uploadQueueContainer = document.getElementById('upload-queue-container');
+const uploadQueueList = document.getElementById('upload-queue-list');
+const queueCountLabel = document.getElementById('queue-count-label');
+const queueSizeLabel = document.getElementById('queue-size-label');
+const uploadAddMoreBtn = document.getElementById('upload-add-more-btn');
+const uploadClearAllBtn = document.getElementById('upload-clear-all-btn');
+const uploadProgressWrap = document.getElementById('upload-progress-wrap');
+const uploadProgressStatus = document.getElementById('upload-progress-status');
+const uploadProgressPct = document.getElementById('upload-progress-pct');
+const uploadProgressBar = document.getElementById('upload-progress-bar');
 const startUploadBtn = document.getElementById('start-upload-btn');
 const blobWarningBanner = document.getElementById('blob-warning-banner');
-const uploadPreviewDims = document.getElementById('upload-preview-dims');
-const uploadPreviewFormat = document.getElementById('upload-preview-format');
 const uploadValidationBanner = document.getElementById('upload-validation-banner');
 const uploadValidationIcon = document.getElementById('upload-validation-icon');
 const uploadValidationTitle = document.getElementById('upload-validation-title');
@@ -1818,219 +1822,470 @@ if (uploadMediaBtn) {
 
 function resetUploadState() {
   state.uploadFileData = null;
+  state.uploadQueue = [];
   if (uploadFileInput) uploadFileInput.value = '';
-  if (uploadDropzone) uploadDropzone.classList.remove('hidden');
-  if (uploadPreviewContainer) uploadPreviewContainer.classList.add('hidden');
+  if (uploadDropzone) uploadDropzone.classList.remove('hidden', 'dragover');
+  if (uploadQueueContainer) uploadQueueContainer.classList.remove('dragover');
+  if (uploadQueueContainer) uploadQueueContainer.classList.add('hidden');
+  if (uploadQueueList) uploadQueueList.innerHTML = '';
+  if (uploadProgressWrap) uploadProgressWrap.classList.add('hidden');
+  if (uploadProgressBar) uploadProgressBar.style.width = '0%';
+  if (uploadProgressPct) uploadProgressPct.textContent = '0%';
+  if (uploadProgressStatus) uploadProgressStatus.textContent = 'Uploading assets...';
   if (uploadOverrideRow) uploadOverrideRow.classList.add('hidden');
   if (uploadOverrideCheckbox) uploadOverrideCheckbox.checked = false;
-  if (uploadPreviewDims) uploadPreviewDims.textContent = '-- × -- px';
-  if (uploadPreviewFormat) uploadPreviewFormat.textContent = 'IMAGE';
-  if (startUploadBtn) startUploadBtn.disabled = true;
+  if (startUploadBtn) {
+    startUploadBtn.disabled = true;
+    const btnText = startUploadBtn.querySelector('.btn-text');
+    const btnSpinner = startUploadBtn.querySelector('.btn-spinner');
+    if (btnText) {
+      btnText.textContent = 'Upload to Library';
+      btnText.classList.remove('hidden');
+    }
+    if (btnSpinner) btnSpinner.classList.add('hidden');
+  }
+  if (uploadAddMoreBtn) uploadAddMoreBtn.disabled = false;
+  if (uploadClearAllBtn) uploadClearAllBtn.disabled = false;
 }
 
+// Drag & drop listeners for both Dropzone and Queue Container
 if (uploadDropzone) {
   uploadDropzone.addEventListener('click', () => {
-    if (uploadFileInput) uploadFileInput.click();
+    if (uploadFileInput) {
+      uploadFileInput.value = '';
+      uploadFileInput.click();
+    }
   });
 
-  uploadDropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadDropzone.classList.add('dragover');
+  ['dragenter', 'dragover'].forEach(evt => {
+    uploadDropzone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadDropzone.classList.add('dragover');
+    });
   });
 
-  uploadDropzone.addEventListener('dragleave', () => {
-    uploadDropzone.classList.remove('dragover');
+  ['dragleave', 'drop'].forEach(evt => {
+    uploadDropzone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadDropzone.classList.remove('dragover');
+    });
   });
 
   uploadDropzone.addEventListener('drop', (e) => {
     e.preventDefault();
+    e.stopPropagation();
     uploadDropzone.classList.remove('dragover');
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileSelected(e.dataTransfer.files[0]);
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+      handleFilesSelected(e.dataTransfer.files);
+    }
+  });
+}
+
+if (uploadQueueContainer) {
+  ['dragenter', 'dragover'].forEach(evt => {
+    uploadQueueContainer.addEventListener(evt, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadQueueContainer.classList.add('dragover');
+    });
+  });
+
+  ['dragleave', 'drop'].forEach(evt => {
+    uploadQueueContainer.addEventListener(evt, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      uploadQueueContainer.classList.remove('dragover');
+    });
+  });
+
+  uploadQueueContainer.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    uploadQueueContainer.classList.remove('dragover');
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+      handleFilesSelected(e.dataTransfer.files);
     }
   });
 }
 
 if (uploadFileInput) {
   uploadFileInput.addEventListener('change', (e) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFileSelected(e.target.files[0]);
+    if (e.target.files && e.target.files.length) {
+      handleFilesSelected(e.target.files);
     }
   });
 }
 
-if (uploadRemoveFileBtn) {
-  uploadRemoveFileBtn.addEventListener('click', resetUploadState);
+if (uploadAddMoreBtn) {
+  uploadAddMoreBtn.addEventListener('click', () => {
+    if (uploadFileInput) {
+      uploadFileInput.value = '';
+      uploadFileInput.click();
+    }
+  });
+}
+
+if (uploadClearAllBtn) {
+  uploadClearAllBtn.addEventListener('click', resetUploadState);
 }
 
 if (uploadOverrideCheckbox) {
-  uploadOverrideCheckbox.addEventListener('change', (e) => {
-    if (startUploadBtn) {
-      startUploadBtn.disabled = !e.target.checked;
-    }
+  uploadOverrideCheckbox.addEventListener('change', () => {
+    updateQueueValidation();
   });
 }
 
-/* ── Web Optimization Health Inspector ─────────────────────── */
-function inspectImageOptimization(file, dataUrl) {
-  const ext = (file.name.split('.').pop() || 'IMG').toUpperCase();
-  const mimeFormat = file.type ? file.type.replace('image/', '').toUpperCase() : ext;
-  if (uploadPreviewFormat) {
-    uploadPreviewFormat.textContent = mimeFormat;
+/* ── Queue Management & Validation ─────────────────────────── */
+function removeFromQueue(id) {
+  state.uploadQueue = state.uploadQueue.filter(it => it.id !== id);
+  if (!state.uploadQueue.length) {
+    resetUploadState();
+  } else {
+    renderUploadQueue();
   }
-
-  const img = new Image();
-  img.onload = () => {
-    const width = img.naturalWidth;
-    const height = img.naturalHeight;
-
-    if (uploadPreviewDims) {
-      uploadPreviewDims.textContent = `${width} × ${height} px`;
-    }
-
-    const sizeKB = file.size / 1024;
-    const sizeMB = sizeKB / 1024;
-
-    if (uploadValidationBanner) {
-      uploadValidationBanner.className = 'upload-validation-banner';
-
-      if (sizeMB > 4) {
-        // Exceeds serverless function payload threshold
-        uploadValidationBanner.classList.add('validation-danger');
-        if (uploadValidationIcon) uploadValidationIcon.textContent = '✕';
-        if (uploadValidationTitle) uploadValidationTitle.textContent = 'File Exceeds 4 MB Limit';
-        if (uploadValidationDesc) uploadValidationDesc.textContent = `Asset is ${sizeMB.toFixed(1)} MB (${width}×${height}px). Serverless upload threshold is 4 MB. Please export a compressed WebP or JPEG under 1600px width.`;
-        if (uploadOverrideRow) uploadOverrideRow.classList.add('hidden');
-        if (startUploadBtn) startUploadBtn.disabled = true;
-      } else if (sizeMB > 1.8) {
-        // Heavy asset (> 1.8MB) - require admin override confirmation
-        uploadValidationBanner.classList.add('validation-warning');
-        if (uploadValidationIcon) uploadValidationIcon.textContent = '⚠️';
-        if (uploadValidationTitle) uploadValidationTitle.textContent = 'Heavy Asset Warning';
-        if (uploadValidationDesc) uploadValidationDesc.textContent = `Asset is ${sizeMB.toFixed(1)} MB (${width}×${height}px). Recommended web size is under 600 KB. High-res imagery may slow down mobile load times.`;
-        if (uploadOverrideRow) {
-          uploadOverrideRow.classList.remove('hidden');
-          if (uploadOverrideCheckbox) uploadOverrideCheckbox.checked = false;
-        }
-        if (startUploadBtn) startUploadBtn.disabled = true;
-      } else if (sizeKB > 600 || width > 2000) {
-        // Moderate size (600KB - 1.8MB)
-        uploadValidationBanner.classList.add('validation-warning');
-        if (uploadValidationIcon) uploadValidationIcon.textContent = '⚠️';
-        if (uploadValidationTitle) uploadValidationTitle.textContent = 'Optimization Notice';
-        if (uploadValidationDesc) uploadValidationDesc.textContent = `Asset is ${sizeKB.toFixed(0)} KB (${width}×${height}px). Acceptable, but converting to WebP under 500 KB will deliver faster mobile performance.`;
-        if (uploadOverrideRow) uploadOverrideRow.classList.add('hidden');
-        if (startUploadBtn) startUploadBtn.disabled = false;
-      } else {
-        // Optimal asset (<= 600KB)
-        uploadValidationBanner.classList.add('validation-optimal');
-        if (uploadValidationIcon) uploadValidationIcon.textContent = '✓';
-        if (uploadValidationTitle) uploadValidationTitle.textContent = 'Web-Optimized Asset';
-        if (uploadValidationDesc) uploadValidationDesc.textContent = `Optimal: ${sizeKB.toFixed(0)} KB (${width}×${height}px, ${mimeFormat}). Ideal file weight for fast rendering across all networks.`;
-        if (uploadOverrideRow) uploadOverrideRow.classList.add('hidden');
-        if (startUploadBtn) startUploadBtn.disabled = false;
-      }
-    }
-  };
-
-  img.onerror = () => {
-    if (uploadPreviewDims) uploadPreviewDims.textContent = 'Vector / SVG';
-    if (uploadValidationBanner) {
-      uploadValidationBanner.className = 'upload-validation-banner validation-optimal';
-      if (uploadValidationIcon) uploadValidationIcon.textContent = '✓';
-      if (uploadValidationTitle) uploadValidationTitle.textContent = 'Vector Asset Detected';
-      if (uploadValidationDesc) uploadValidationDesc.textContent = 'SVG assets are infinitely scalable and lightweight.';
-    }
-    if (uploadOverrideRow) uploadOverrideRow.classList.add('hidden');
-    if (startUploadBtn) startUploadBtn.disabled = false;
-  };
-
-  img.src = dataUrl;
 }
 
-function handleFileSelected(file) {
-  if (!file) return;
-  if (!file.type.startsWith('image/')) {
-    showToast('Please select a valid image file (PNG, JPG, WebP, SVG).', 'error');
-    return;
-  }
-  if (file.size > 10 * 1024 * 1024) {
-    showToast('File size exceeds 10MB limit.', 'error');
+function updateQueueValidation() {
+  if (!state.uploadQueue || !state.uploadQueue.length) {
+    if (startUploadBtn) startUploadBtn.disabled = true;
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const base64 = e.target.result.split(',')[1];
-    state.uploadFileData = {
-      filename: file.name,
-      contentType: file.type,
+  const pending = state.uploadQueue.filter(it => it.status !== 'done');
+  if (!pending.length) {
+    if (startUploadBtn) startUploadBtn.disabled = true;
+    return;
+  }
+
+  const hasExceeded = pending.some(it => it.isExceeded);
+  const hasOversized = pending.some(it => it.isOversized);
+
+  if (uploadValidationBanner) {
+    uploadValidationBanner.className = 'upload-validation-banner';
+
+    if (hasExceeded) {
+      uploadValidationBanner.classList.add('validation-danger');
+      if (uploadValidationIcon) uploadValidationIcon.textContent = '✕';
+      if (uploadValidationTitle) uploadValidationTitle.textContent = 'Asset Exceeds 4 MB Limit';
+      if (uploadValidationDesc) uploadValidationDesc.textContent = 'One or more assets exceed the 4 MB serverless threshold. Remove them (✕) or compress them before uploading.';
+      if (uploadOverrideRow) uploadOverrideRow.classList.add('hidden');
+      if (startUploadBtn) startUploadBtn.disabled = true;
+    } else if (hasOversized) {
+      uploadValidationBanner.classList.add('validation-warning');
+      if (uploadValidationIcon) uploadValidationIcon.textContent = '⚠️';
+      if (uploadValidationTitle) uploadValidationTitle.textContent = 'Heavy Asset Warning';
+      if (uploadValidationDesc) uploadValidationDesc.textContent = 'One or more assets exceed 1.8 MB. High-resolution imagery may impact mobile loading. Check confirmation below to proceed.';
+      if (uploadOverrideRow) uploadOverrideRow.classList.remove('hidden');
+      if (startUploadBtn) {
+        startUploadBtn.disabled = !(uploadOverrideCheckbox && uploadOverrideCheckbox.checked);
+      }
+    } else {
+      uploadValidationBanner.classList.add('validation-optimal');
+      if (uploadValidationIcon) uploadValidationIcon.textContent = '✓';
+      if (uploadValidationTitle) uploadValidationTitle.textContent = 'Web-Optimized Assets';
+      if (uploadValidationDesc) uploadValidationDesc.textContent = `${pending.length} asset${pending.length > 1 ? 's' : ''} verified and ready for high-speed cloud delivery.`;
+      if (uploadOverrideRow) uploadOverrideRow.classList.add('hidden');
+      if (startUploadBtn) startUploadBtn.disabled = false;
+    }
+  }
+
+  if (startUploadBtn) {
+    const btnText = startUploadBtn.querySelector('.btn-text');
+    if (btnText) {
+      btnText.textContent = `Upload ${pending.length} ${pending.length === 1 ? 'Asset' : 'Assets'} to Library`;
+    }
+  }
+}
+
+function renderUploadQueue() {
+  if (!state.uploadQueue || state.uploadQueue.length === 0) {
+    resetUploadState();
+    return;
+  }
+
+  if (uploadDropzone) uploadDropzone.classList.add('hidden');
+  if (uploadQueueContainer) uploadQueueContainer.classList.remove('hidden');
+
+  const totalCount = state.uploadQueue.length;
+  const totalBytes = state.uploadQueue.reduce((acc, it) => acc + (it.size || 0), 0);
+
+  if (queueCountLabel) {
+    queueCountLabel.textContent = `${totalCount} ${totalCount === 1 ? 'file' : 'files'} selected`;
+  }
+  if (queueSizeLabel) {
+    queueSizeLabel.textContent = formatBytes(totalBytes);
+  }
+
+  if (uploadQueueList) {
+    uploadQueueList.innerHTML = state.uploadQueue.map(item => {
+      let badgeHtml = '';
+      if (item.status === 'uploading') {
+        badgeHtml = `<span class="queue-spinner"><span class="spinner-circle"></span> Uploading...</span>`;
+      } else if (item.status === 'done') {
+        badgeHtml = `<span class="queue-badge badge-success">✓ Uploaded</span>`;
+      } else if (item.status === 'error') {
+        badgeHtml = `<span class="queue-badge badge-danger" title="${escapeHtml(item.errorMsg || 'Failed')}">✕ Failed</span>`;
+      } else {
+        if (item.isExceeded) {
+          badgeHtml = `<span class="queue-badge badge-danger" title="Exceeds 4 MB serverless payload limit">Exceeds 4MB</span>`;
+        } else if (item.isOversized) {
+          badgeHtml = `<span class="queue-badge badge-warning" title="Heavy asset (>1.8MB). Recommended under 600 KB.">Heavy</span>`;
+        } else {
+          badgeHtml = `<span class="queue-badge badge-optimal">Optimal</span>`;
+        }
+      }
+
+      const dimsText = item.isSvg
+        ? 'Vector SVG'
+        : (item.width && item.height ? `${item.width} × ${item.height} px` : 'Inspecting...');
+
+      const itemClass = ['upload-queue-item', item.status].filter(Boolean).join(' ');
+      const isLocked = item.status === 'uploading' || item.status === 'done';
+
+      return `
+        <div class="${itemClass}" data-id="${item.id}">
+          <img class="queue-item-thumb" src="${item.dataUrl || '/assets/logos/logo.png'}" alt="${escapeHtml(item.name)}">
+          <div class="queue-item-meta">
+            <div class="queue-item-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+            <div class="queue-item-details">
+              <span class="queue-item-format">${item.format}</span>
+              <span>• ${dimsText}</span>
+              <span>• ${formatBytes(item.size)}</span>
+            </div>
+          </div>
+          <div class="queue-item-status-col">
+            ${badgeHtml}
+          </div>
+          ${!isLocked ? `
+            <button type="button" class="queue-item-remove-btn" data-remove-id="${item.id}" title="Remove file from queue">
+              ✕
+            </button>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+
+    uploadQueueList.querySelectorAll('.queue-item-remove-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-remove-id');
+        removeFromQueue(id);
+      });
+    });
+  }
+
+  updateQueueValidation();
+}
+
+function handleFilesSelected(fileList) {
+  if (!fileList || !fileList.length) return;
+
+  const files = Array.from(fileList);
+  let skippedNonImages = 0;
+  let skippedLarge = 0;
+  let skippedDuplicates = 0;
+  const validFiles = [];
+
+  for (const file of files) {
+    const isImage = file.type.startsWith('image/') || /\.(jpe?g|png|webp|svg)$/i.test(file.name);
+    if (!isImage) {
+      skippedNonImages++;
+      continue;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      skippedLarge++;
+      continue;
+    }
+    const isDup = state.uploadQueue.some(item => item.name === file.name && item.size === file.size);
+    if (isDup) {
+      skippedDuplicates++;
+      continue;
+    }
+    validFiles.push(file);
+  }
+
+  if (skippedNonImages > 0) {
+    showToast(`Skipped ${skippedNonImages} non-image file${skippedNonImages > 1 ? 's' : ''}.`, 'warning');
+  }
+  if (skippedLarge > 0) {
+    showToast(`Skipped ${skippedLarge} file${skippedLarge > 1 ? 's' : ''} over 15 MB.`, 'error');
+  }
+  if (skippedDuplicates > 0) {
+    showToast(`Skipped ${skippedDuplicates} already selected file${skippedDuplicates > 1 ? 's' : ''}.`, 'info');
+  }
+
+  if (!validFiles.length) return;
+
+  for (const file of validFiles) {
+    const ext = (file.name.split('.').pop() || 'IMG').toUpperCase();
+    const mimeFormat = file.type ? file.type.replace('image/', '').toUpperCase() : ext;
+    const isSvg = file.type === 'image/svg+xml' || ext === 'SVG';
+    const sizeMB = file.size / (1024 * 1024);
+
+    const queueItem = {
+      id: 'uq_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
+      file,
+      name: file.name,
       size: file.size,
-      base64,
-      dataUrl: e.target.result,
+      contentType: file.type || (isSvg ? 'image/svg+xml' : 'image/jpeg'),
+      format: mimeFormat,
+      isSvg,
+      width: null,
+      height: null,
+      base64: null,
+      dataUrl: '',
+      isExceeded: sizeMB > 4.0,
+      isOversized: sizeMB > 1.8 && sizeMB <= 4.0,
+      status: 'pending',
+      errorMsg: null,
+      uploadedUrl: null,
     };
 
-    if (uploadPreviewImg) uploadPreviewImg.src = e.target.result;
-    if (uploadPreviewName) uploadPreviewName.textContent = file.name;
-    if (uploadPreviewSize) uploadPreviewSize.textContent = formatBytes(file.size);
+    state.uploadQueue.push(queueItem);
 
-    if (uploadDropzone) uploadDropzone.classList.add('hidden');
-    if (uploadPreviewContainer) uploadPreviewContainer.classList.remove('hidden');
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      queueItem.dataUrl = e.target.result;
+      queueItem.base64 = e.target.result.split(',')[1];
 
-    inspectImageOptimization(file, e.target.result);
-  };
-  reader.readAsDataURL(file);
+      if (isSvg) {
+        queueItem.width = 'SVG';
+        queueItem.height = 'Vector';
+        renderUploadQueue();
+      } else {
+        const img = new Image();
+        img.onload = () => {
+          queueItem.width = img.naturalWidth;
+          queueItem.height = img.naturalHeight;
+          renderUploadQueue();
+        };
+        img.onerror = () => {
+          queueItem.width = '--';
+          queueItem.height = '--';
+          renderUploadQueue();
+        };
+        img.src = e.target.result;
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  renderUploadQueue();
 }
 
 if (startUploadBtn) {
   startUploadBtn.addEventListener('click', async () => {
-    if (!state.uploadFileData) return;
+    const pending = state.uploadQueue.filter(it => it.status !== 'done');
+    if (!pending.length) return;
 
     const btnText = startUploadBtn.querySelector('.btn-text');
     const btnSpinner = startUploadBtn.querySelector('.btn-spinner');
 
-    btnText.classList.add('hidden');
-    btnSpinner.classList.remove('hidden');
+    if (btnText) btnText.classList.add('hidden');
+    if (btnSpinner) btnSpinner.classList.remove('hidden');
     startUploadBtn.disabled = true;
 
+    if (uploadAddMoreBtn) uploadAddMoreBtn.disabled = true;
+    if (uploadClearAllBtn) uploadClearAllBtn.disabled = true;
+    if (uploadProgressWrap) uploadProgressWrap.classList.remove('hidden');
+
+    const total = pending.length;
+    let successCount = 0;
+    let failCount = 0;
+    const uploadedAssets = [];
+
     try {
-      const res = await apiRequest('/api/cms/media', {
-        method: 'POST',
-        body: JSON.stringify({
-          filename: state.uploadFileData.filename,
-          contentType: state.uploadFileData.contentType,
-          fileData: state.uploadFileData.base64,
-        }),
-      });
+      for (let i = 0; i < total; i++) {
+        const item = pending[i];
+        item.status = 'uploading';
 
-      showToast('Media uploaded successfully!', 'success');
-      closeModal('upload-modal');
-
-      const uploadedUrl = res && res.media && res.media.url ? res.media.url : null;
-      const uploadedName = (res && res.media && res.media.name) || state.uploadFileData.filename;
-
-      if (typeof state.uploadTargetCallback === 'function' && uploadedUrl) {
-        await state.uploadTargetCallback(uploadedUrl);
-        state.uploadTargetCallback = null;
-      } else if (uploadedUrl) {
-        // Standalone upload from Media Library: prompt auto-assignment if matched
-        const matched = findBestMatchingBook(uploadedName);
-        if (matched) {
-          setTimeout(() => {
-            openAssignMediaModal(uploadedUrl, uploadedName);
-            showToast(`💡 Auto-detected "${matched.title} ${matched.subtitle || ''}". Click "Assign & Publish" to link.`, 'info', 7000);
-          }, 350);
+        const startPct = Math.round((i / total) * 100);
+        if (uploadProgressStatus) {
+          uploadProgressStatus.textContent = `Uploading ${i + 1} of ${total}: ${item.name}...`;
         }
+        if (uploadProgressPct) uploadProgressPct.textContent = `${startPct}%`;
+        if (uploadProgressBar) uploadProgressBar.style.width = `${startPct}%`;
+        renderUploadQueue();
+
+        // Wait up to 5s if base64 reader hasn't finished yet
+        if (!item.base64) {
+          await new Promise((resolve) => {
+            let waitCount = 0;
+            const timer = setInterval(() => {
+              waitCount++;
+              if (item.base64 || waitCount > 50) {
+                clearInterval(timer);
+                resolve();
+              }
+            }, 100);
+          });
+        }
+
+        try {
+          const res = await apiRequest('/api/cms/media', {
+            method: 'POST',
+            body: JSON.stringify({
+              filename: item.name,
+              contentType: item.contentType,
+              fileData: item.base64,
+            }),
+          });
+
+          item.status = 'done';
+          item.uploadedUrl = res && res.media && res.media.url ? res.media.url : null;
+          const finalName = (res && res.media && res.media.name) || item.name;
+          uploadedAssets.push({ url: item.uploadedUrl, name: finalName });
+          successCount++;
+        } catch (err) {
+          console.error(`[Upload Error] ${item.name}:`, err);
+          item.status = 'error';
+          item.errorMsg = err.message || 'Upload failed.';
+          failCount++;
+        }
+
+        const donePct = Math.round(((i + 1) / total) * 100);
+        if (uploadProgressPct) uploadProgressPct.textContent = `${donePct}%`;
+        if (uploadProgressBar) uploadProgressBar.style.width = `${donePct}%`;
+        renderUploadQueue();
       }
 
-      resetUploadState();
+      if (failCount === 0) {
+        showToast(`Successfully uploaded ${successCount} media asset${successCount > 1 ? 's' : ''}!`, 'success');
+
+        // Target callback (e.g. from Book Modal)
+        if (typeof state.uploadTargetCallback === 'function' && uploadedAssets[0]?.url) {
+          await state.uploadTargetCallback(uploadedAssets[0].url);
+          state.uploadTargetCallback = null;
+        } else if (uploadedAssets.length === 1 && uploadedAssets[0]?.url) {
+          // Single standalone upload: prompt auto-assign if title matches
+          const matched = findBestMatchingBook(uploadedAssets[0].name);
+          if (matched) {
+            setTimeout(() => {
+              openAssignMediaModal(uploadedAssets[0].url, uploadedAssets[0].name);
+              showToast(`💡 Auto-detected "${matched.title} ${matched.subtitle || ''}". Click "Assign & Publish" to link.`, 'info', 7000);
+            }, 400);
+          }
+        }
+
+        setTimeout(() => {
+          closeModal('upload-modal');
+          resetUploadState();
+        }, 600);
+      } else {
+        showToast(`Uploaded ${successCount} assets. ${failCount} asset${failCount > 1 ? 's' : ''} encountered an error.`, 'error');
+      }
+
       await loadMedia();
     } catch (err) {
-      showToast(err.message || 'Media upload failed.', 'error');
+      showToast(err.message || 'Media batch upload encountered an error.', 'error');
     } finally {
-      btnText.classList.remove('hidden');
-      btnSpinner.classList.add('hidden');
-      startUploadBtn.disabled = false;
+      if (btnText) btnText.classList.remove('hidden');
+      if (btnSpinner) btnSpinner.classList.add('hidden');
+      if (uploadAddMoreBtn) uploadAddMoreBtn.disabled = false;
+      if (uploadClearAllBtn) uploadClearAllBtn.disabled = false;
+      updateQueueValidation();
     }
   });
 }

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/admin/admin.css?v=2.5">
+  <link rel="stylesheet" href="/admin/admin.css?v=2.6">
 </head>
 <body class="cms-body">
 
@@ -1160,12 +1160,17 @@
   </div>
 
   <!-- ── MODAL: UPLOAD MEDIA ───────────────────────────────── -->
-  <div id="upload-modal" class="cms-modal-backdrop hidden" role="dialog" aria-modal="true">
-    <div class="cms-modal-box modal-md">
+  <div id="upload-modal" class="cms-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="upload-modal-title">
+    <div class="cms-modal-box modal-md upload-modal-box">
       <div class="modal-header">
         <div class="modal-title-group">
-          <h3>Upload Media Asset</h3>
-          <p class="modal-subtitle">Upload book covers, sample illustrations, or brand artwork.</p>
+          <div class="modal-title-row">
+            <span class="modal-title-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            </span>
+            <h3 id="upload-modal-title">Upload Media Assets</h3>
+          </div>
+          <p id="upload-modal-subtitle" class="modal-subtitle">Upload one or multiple book covers, sample illustrations, or brand graphics.</p>
         </div>
         <button type="button" class="modal-close-btn" data-close-modal="upload-modal" aria-label="Close modal">&times;</button>
       </div>
@@ -1175,37 +1180,58 @@
           <span>💡 <strong>Vercel Blob Cloud Storage:</strong> Book covers under 2 MB are saved directly to your catalogue! For global high-speed CDN hosting, connect <strong>Vercel Blob</strong> in your Vercel Dashboard (Storage → Blob → Connect).</span>
         </div>
 
+        <!-- Dropzone (Supports multiple files) -->
         <div id="upload-dropzone" class="media-dropzone">
-          <input type="file" id="upload-file-input" class="hidden" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+          <input type="file" id="upload-file-input" class="hidden" accept="image/png,image/jpeg,image/webp,image/svg+xml" multiple>
           <div class="dropzone-content">
             <div class="dropzone-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
             </div>
-            <h4>Drag & drop image here, or <span>browse</span></h4>
-            <p>Recommended: WebP or JPG · Max 1200px width · Under 800 KB</p>
+            <h4>Drag & drop images here, or <span>browse files</span></h4>
+            <p>Upload single or multiple files · WebP, PNG, JPG, SVG · Max 4 MB per file</p>
           </div>
         </div>
 
-        <div id="upload-preview-container" class="upload-preview-container hidden">
-          <div class="upload-preview-card">
-            <img id="upload-preview-img" src="" alt="Selected image preview">
-            <div class="upload-preview-meta">
-              <strong id="upload-preview-name">filename.png</strong>
-              <div class="upload-metric-chips">
-                <span class="upload-metric-chip" id="upload-preview-size">-- KB</span>
-                <span class="upload-metric-chip" id="upload-preview-dims">-- × -- px</span>
-                <span class="upload-metric-chip" id="upload-preview-format">IMAGE</span>
-              </div>
+        <!-- Files Queue Container (Active when 1+ files selected) -->
+        <div id="upload-queue-container" class="upload-queue-container hidden">
+          <div class="upload-queue-header">
+            <div class="queue-header-left">
+              <strong id="queue-count-label">0 files selected</strong>
+              <span id="queue-size-label" class="queue-size-pill">0 KB</span>
             </div>
-            <button type="button" id="upload-remove-file-btn" class="btn-subtle btn-sm">Change</button>
+            <div class="queue-header-actions">
+              <button type="button" id="upload-add-more-btn" class="btn-subtle btn-xs" title="Select more images to add to the queue">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Add More</span>
+              </button>
+              <button type="button" id="upload-clear-all-btn" class="btn-subtle btn-xs btn-action-danger" title="Clear all files from queue">
+                Clear All
+              </button>
+            </div>
           </div>
 
-          <!-- Web Optimization Health Check Feedback -->
+          <!-- Scrollable Queue List of Selected Files -->
+          <div id="upload-queue-list" class="upload-queue-list">
+            <!-- Populated dynamically by admin.js -->
+          </div>
+
+          <!-- Overall Optimization Health Feedback -->
           <div id="upload-validation-banner" class="upload-validation-banner validation-optimal">
             <div class="validation-icon" id="upload-validation-icon">✓</div>
             <div class="validation-content">
-              <div class="validation-status-title" id="upload-validation-title">Checking image...</div>
+              <div class="validation-status-title" id="upload-validation-title">Checking assets...</div>
               <div class="validation-status-desc" id="upload-validation-desc">Analyzing dimensions and file weight for web performance.</div>
+            </div>
+          </div>
+
+          <!-- Upload Progress Bar (Visible while uploading) -->
+          <div id="upload-progress-wrap" class="upload-progress-wrap hidden">
+            <div class="progress-labels">
+              <span id="upload-progress-status">Uploading assets...</span>
+              <span id="upload-progress-pct">0%</span>
+            </div>
+            <div class="progress-bar-track">
+              <div id="upload-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
             </div>
           </div>
 
@@ -1215,11 +1241,11 @@
             <p>Target <strong>800–1200px width</strong> and export as <strong>WebP</strong> or <strong>JPG (80–85%)</strong>. For logos/transparency, use <strong>WebP</strong> or optimized <strong>PNG</strong>.</p>
           </div>
 
-          <!-- Optional Override for Admins -->
+          <!-- Optional Override for Oversized Assets -->
           <div id="upload-override-row" class="upload-override-row hidden">
             <label class="checkbox-label">
               <input type="checkbox" id="upload-override-checkbox">
-              <span>I understand this image is oversized and may slow down page loading; upload anyway</span>
+              <span>One or more assets exceed recommended size. Check this to proceed with upload anyway.</span>
             </label>
           </div>
         </div>
@@ -1228,7 +1254,7 @@
           <button type="button" class="btn btn-secondary" data-close-modal="upload-modal">Cancel</button>
           <button type="button" id="start-upload-btn" class="btn btn-primary" disabled>
             <span class="btn-text">Upload to Library</span>
-            <span class="btn-spinner hidden"></span>
+            <span class="btn-spinner hidden"><span class="spinner-circle"></span> Uploading...</span>
           </button>
         </div>
       </div>
@@ -1444,6 +1470,6 @@
     </div>
   </div>
 
-  <script src="/admin/admin.js?v=2.5"></script>
+  <script src="/admin/admin.js?v=2.6"></script>
 </body>
 </html>
