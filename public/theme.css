@@ -1575,6 +1575,21 @@ em { font-style: normal; color: var(--green); }
   z-index: 1;
 }
 
+/* Approach CTA Button (section is always dark navy across light & dark modes) */
+.approach .btn-outline {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.28);
+  background: transparent;
+}
+
+.approach .btn-outline:hover {
+  background: rgba(8, 120, 201, 0.22);
+  border-color: rgba(77, 165, 255, 0.65);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 16px rgba(8, 120, 201, 0.35);
+}
+
 /* ── Parents Section ──────────────────────────────────── */
 .parents {
   display: grid;
