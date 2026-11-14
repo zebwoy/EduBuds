@@ -115,6 +115,12 @@ const bookFieldPublished = document.getElementById('book-field-published');
 const bookFieldMode = document.getElementById('book-field-mode');
 const generateWaTemplateBtn = document.getElementById('generate-wa-template-btn');
 const browseMediaForBookBtn = document.getElementById('browse-media-for-book-btn');
+const bookDuplicateBar = document.getElementById('book-duplicate-bar');
+const bookDuplicateSourceSelect = document.getElementById('book-duplicate-source-select');
+const bookDuplicateApplyBtn = document.getElementById('book-duplicate-apply-btn');
+const bookDuplicateClearBtn = document.getElementById('book-duplicate-clear-btn');
+const bookDuplicateBanner = document.getElementById('book-duplicate-banner');
+const bookDuplicateBannerDesc = document.getElementById('book-duplicate-banner-desc');
 
 // Series Modal DOM Elements
 const seriesModal = document.getElementById('series-modal');
@@ -1235,6 +1241,9 @@ function renderBooksGrid() {
         </label>
 
         <div class="card-action-btns">
+          <button type="button" class="icon-action-btn duplicate-btn duplicate-book-btn" data-id="${escapeHtml(book.id)}" title="Duplicate this book as a new entry">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          </button>
           <button type="button" class="icon-action-btn edit-book-btn" data-id="${escapeHtml(book.id)}" title="Edit book details">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
           </button>
@@ -1269,6 +1278,14 @@ function renderBooksGrid() {
         btn.disabled = false;
         btn.textContent = 'Retry Link';
       }
+    });
+  });
+
+  booksGridEl.querySelectorAll('.duplicate-book-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const bookId = btn.dataset.id;
+      openBookModal('duplicate', bookId);
     });
   });
 
@@ -1332,6 +1349,178 @@ async function handleToggleBookPublish(bookId, isPublished, inputEl) {
   }
 }
 
+/* ── Book Modal Duplication & Templating ───────────────────── */
+function renderDuplicateSourceOptions(selectedBookId = null) {
+  if (!bookDuplicateSourceSelect) return;
+  bookDuplicateSourceSelect.innerHTML = '<option value="">— Select book template —</option>';
+
+  const currentSeries = state.series || [];
+
+  currentSeries.forEach(series => {
+    const seriesBooks = state.books.filter(b => (b.seriesId || b.series_id) === series.id);
+    if (!seriesBooks.length) return;
+
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = series.label || series.id;
+
+    // Sort books by order index
+    seriesBooks.sort((a, b) => (a.orderIndex ?? a.order_index ?? 0) - (b.orderIndex ?? b.order_index ?? 0));
+
+    seriesBooks.forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b.id;
+      const sub = b.subtitle ? ` (${b.subtitle})` : '';
+      opt.textContent = `${b.title}${sub}`;
+      if (selectedBookId && b.id === selectedBookId) {
+        opt.selected = true;
+      }
+      optgroup.appendChild(opt);
+    });
+
+    bookDuplicateSourceSelect.appendChild(optgroup);
+  });
+
+  const unassigned = state.books.filter(b => !currentSeries.some(s => s.id === (b.seriesId || b.series_id)));
+  if (unassigned.length) {
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = 'Other Titles';
+    unassigned.forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b.id;
+      const sub = b.subtitle ? ` (${b.subtitle})` : '';
+      opt.textContent = `${b.title}${sub}`;
+      if (selectedBookId && b.id === selectedBookId) {
+        opt.selected = true;
+      }
+      optgroup.appendChild(opt);
+    });
+    bookDuplicateSourceSelect.appendChild(optgroup);
+  }
+
+  if (bookDuplicateApplyBtn) {
+    bookDuplicateApplyBtn.disabled = !bookDuplicateSourceSelect.value;
+  }
+}
+
+function generateUniqueBookId(seriesId, title, subtitle) {
+  const seriesSlug = (seriesId || 'book').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const titleSlug = (title || 'title').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const subSlug = subtitle ? '-' + subtitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '';
+
+  let base = `${seriesSlug}-${titleSlug}${subSlug}`.slice(0, 50).replace(/(^-|-$)/g, '');
+  if (!base) base = 'book-' + Date.now();
+
+  let candidate = base;
+  let counter = 2;
+  while (state.books.some(b => b.id === candidate)) {
+    candidate = `${base}-${counter}`.slice(0, 60);
+    counter++;
+  }
+
+  if (bookFieldId) {
+    bookFieldId.value = candidate;
+    bookFieldId.dataset.dirty = 'true';
+  }
+  return candidate;
+}
+
+function generateWaTemplateForCurrentBook() {
+  const title = (bookFieldTitle ? bookFieldTitle.value : '').trim() || 'Book';
+  const sub = (bookFieldSubtitle ? bookFieldSubtitle.value : '').trim();
+  const full = `${title}${sub ? ' (' + sub + ')' : ''}`;
+  if (bookFieldWa) {
+    bookFieldWa.value = `Assalamu Alaikum! I am interested in ordering the EduBuds "${full}". Could you please share details on pricing, availability, and how to place an order?`;
+  }
+}
+
+function duplicateFromBook(sourceBookId) {
+  const sourceBook = state.books.find(b => b.id === sourceBookId);
+  if (!sourceBook) return;
+
+  const targetSeriesId = sourceBook.seriesId || sourceBook.series_id || '';
+  if (bookFieldSeries) bookFieldSeries.value = targetSeriesId;
+
+  // Title
+  if (bookFieldTitle) bookFieldTitle.value = sourceBook.title || '';
+
+  // Smart Subtitle Increment:
+  // e.g. "Grade 1" -> "Grade 2", "Book 3" -> "Book 4", "Volume 1" -> "Volume 2", "Part 1" -> "Part 2"
+  const rawSub = (sourceBook.subtitle || '').trim();
+  let nextSub = rawSub;
+  const numMatch = rawSub.match(/^(.*?)(\d+)(\s*)$/);
+  if (numMatch) {
+    const prefix = numMatch[1];
+    const currentNum = parseInt(numMatch[2], 10);
+    const suffix = numMatch[3];
+    nextSub = `${prefix}${currentNum + 1}${suffix}`;
+  }
+  if (bookFieldSubtitle) bookFieldSubtitle.value = nextSub;
+
+  // Smart Order Index: Highest order index in this series + 1
+  const seriesBooks = state.books.filter(b => (b.seriesId || b.series_id) === targetSeriesId);
+  const maxOrder = seriesBooks.reduce((max, b) => Math.max(max, b.orderIndex ?? b.order_index ?? 0), 0);
+  if (bookFieldOrder) bookFieldOrder.value = maxOrder + 1;
+
+  // Tags & Description
+  if (bookFieldTags) {
+    bookFieldTags.value = Array.isArray(sourceBook.tags) ? sourceBook.tags.join(', ') : (sourceBook.tags || '');
+  }
+  if (bookFieldDesc) {
+    bookFieldDesc.value = sourceBook.description || '';
+  }
+
+  // Cover image: retain source cover as visual starter
+  const sourceImage = sourceBook.image || '/assets/placeholder-cover.svg';
+  if (bookFieldImage) bookFieldImage.value = sourceImage;
+  updateCoverPreview(sourceImage);
+
+  // Generate clean unique ID
+  generateUniqueBookId(targetSeriesId, sourceBook.title, nextSub);
+
+  // Synchronize WhatsApp template
+  generateWaTemplateForCurrentBook();
+
+  // Published toggle defaults to active for new book
+  if (bookFieldPublished) bookFieldPublished.checked = true;
+
+  // Form mode is create (saving will POST a brand new book)
+  if (bookFieldMode) bookFieldMode.value = 'create';
+  if (bookFieldId) bookFieldId.disabled = false;
+
+  // Visual context badges
+  if (bookModalTitle) bookModalTitle.textContent = 'Add New Book (Duplicate)';
+  const subEl = document.getElementById('book-modal-sub');
+  if (subEl) {
+    subEl.textContent = `Cloned template from "${sourceBook.title}${rawSub ? ' - ' + rawSub : ''}". Modify fields and save.`;
+  }
+
+  if (bookDuplicateBanner) {
+    bookDuplicateBanner.classList.remove('hidden');
+    if (bookDuplicateBannerDesc) {
+      bookDuplicateBannerDesc.textContent = `Pre-populated from "${sourceBook.title}${rawSub ? ' - ' + rawSub : ''}". Adjust subtitle, slug, or cover image below and save as a new book.`;
+    }
+  }
+
+  if (bookDuplicateClearBtn) {
+    bookDuplicateClearBtn.classList.remove('hidden');
+  }
+
+  if (bookDuplicateSourceSelect) {
+    bookDuplicateSourceSelect.value = sourceBookId;
+  }
+  if (bookDuplicateApplyBtn) {
+    bookDuplicateApplyBtn.disabled = true;
+  }
+
+  // Automatically focus on the Subtitle field for quickest editing
+  setTimeout(() => {
+    if (bookFieldSubtitle) {
+      bookFieldSubtitle.focus();
+      bookFieldSubtitle.select();
+    }
+  }, 100);
+}
+
 /* ── Book Modal (Add / Edit) ───────────────────────────────── */
 function openBookModal(mode = 'create', bookId = null) {
   if (!bookModal) return;
@@ -1339,24 +1528,14 @@ function openBookModal(mode = 'create', bookId = null) {
   bookModalForm.reset();
   renderSeriesOptionsInBookModal();
 
-  bookFieldMode.value = mode;
+  if (mode === 'edit') {
+    bookFieldMode.value = 'edit';
+    if (bookDuplicateBar) bookDuplicateBar.classList.add('hidden');
+    if (bookDuplicateBanner) bookDuplicateBanner.classList.add('hidden');
 
-  if (mode === 'create') {
-    bookModalTitle.textContent = 'Add New Book';
-    document.getElementById('book-modal-sub').textContent = 'Add a curriculum title to your public catalogue.';
-    bookFieldPublished.checked = true;
-    bookFieldOrder.value = state.books.length + 1;
-    bookFieldImage.value = '/assets/placeholder-cover.svg';
-    updateCoverPreview('/assets/placeholder-cover.svg');
-
-    if (state.activeSeriesFilter !== 'all') {
-      bookFieldSeries.value = state.activeSeriesFilter;
-    }
-
-    bookFieldId.disabled = false;
-  } else {
     bookModalTitle.textContent = 'Edit Book';
-    document.getElementById('book-modal-sub').textContent = `Editing: ${bookId}`;
+    const subEl = document.getElementById('book-modal-sub');
+    if (subEl) subEl.textContent = `Editing: ${bookId}`;
 
     const book = state.books.find(b => b.id === bookId);
     if (!book) return;
@@ -1373,6 +1552,38 @@ function openBookModal(mode = 'create', bookId = null) {
     bookFieldDesc.value = book.description || '';
     bookFieldWa.value = book.whatsappMessage || book.whatsapp_message || '';
     bookFieldPublished.checked = Boolean(book.isPublished);
+
+    bookModal.classList.remove('hidden');
+    return;
+  }
+
+  // Mode is 'create' or 'duplicate'
+  bookFieldMode.value = 'create';
+  if (bookDuplicateBar) bookDuplicateBar.classList.remove('hidden');
+
+  if (mode === 'duplicate' && bookId) {
+    renderDuplicateSourceOptions(bookId);
+    duplicateFromBook(bookId);
+  } else {
+    // Fresh create
+    bookModalTitle.textContent = 'Add New Book';
+    const subEl = document.getElementById('book-modal-sub');
+    if (subEl) subEl.textContent = 'Add a curriculum title to your public catalogue.';
+    bookFieldPublished.checked = true;
+    bookFieldOrder.value = state.books.length + 1;
+    bookFieldImage.value = '/assets/placeholder-cover.svg';
+    updateCoverPreview('/assets/placeholder-cover.svg');
+
+    if (state.activeSeriesFilter !== 'all') {
+      bookFieldSeries.value = state.activeSeriesFilter;
+    }
+
+    bookFieldId.disabled = false;
+    delete bookFieldId.dataset.dirty;
+
+    renderDuplicateSourceOptions();
+    if (bookDuplicateBanner) bookDuplicateBanner.classList.add('hidden');
+    if (bookDuplicateClearBtn) bookDuplicateClearBtn.classList.add('hidden');
   }
 
   bookModal.classList.remove('hidden');
@@ -1441,6 +1652,18 @@ if (bookFieldTitle) {
     }
   });
 }
+
+if (bookFieldSubtitle) {
+  bookFieldSubtitle.addEventListener('input', () => {
+    if (bookFieldMode.value === 'create' && !bookFieldId.dataset.dirty) {
+      const seriesSlug = bookFieldSeries.value || 'book';
+      const titleSlug = (bookFieldTitle ? bookFieldTitle.value : '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const subSlug = bookFieldSubtitle.value ? '-' + bookFieldSubtitle.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '';
+      bookFieldId.value = `${seriesSlug}-${titleSlug}${subSlug}`.slice(0, 50);
+    }
+  });
+}
+
 if (bookFieldId) {
   bookFieldId.addEventListener('input', () => {
     bookFieldId.dataset.dirty = 'true';
@@ -1449,11 +1672,33 @@ if (bookFieldId) {
 
 if (generateWaTemplateBtn) {
   generateWaTemplateBtn.addEventListener('click', () => {
-    const title = bookFieldTitle.value.trim() || 'Book';
-    const sub = bookFieldSubtitle.value.trim();
-    const full = `${title}${sub ? ' (' + sub + ')' : ''}`;
-    bookFieldWa.value = `Assalamu Alaikum! I am interested in ordering the EduBuds "${full}". Could you please share details on pricing, availability, and how to place an order?`;
+    generateWaTemplateForCurrentBook();
     showToast('WhatsApp enquiry template generated!', 'info');
+  });
+}
+
+if (bookDuplicateSourceSelect) {
+  bookDuplicateSourceSelect.addEventListener('change', () => {
+    if (bookDuplicateApplyBtn) {
+      bookDuplicateApplyBtn.disabled = !bookDuplicateSourceSelect.value;
+    }
+  });
+}
+
+if (bookDuplicateApplyBtn) {
+  bookDuplicateApplyBtn.addEventListener('click', () => {
+    const selectedId = bookDuplicateSourceSelect ? bookDuplicateSourceSelect.value : null;
+    if (selectedId) {
+      duplicateFromBook(selectedId);
+      showToast('Template fields loaded! Customize and save book.', 'info');
+    }
+  });
+}
+
+if (bookDuplicateClearBtn) {
+  bookDuplicateClearBtn.addEventListener('click', () => {
+    openBookModal('create');
+    showToast('Reset to blank book form.', 'info');
   });
 }
 

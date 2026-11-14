@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/admin/admin.css?v=2.6">
+  <link rel="stylesheet" href="/admin/admin.css?v=2.7">
 </head>
 <body class="cms-body">
 
@@ -953,6 +953,34 @@
       <form id="book-modal-form" class="modal-form">
         <input type="hidden" id="book-field-mode" value="create">
 
+        <!-- Duplicate / Template Quick-Picker Bar -->
+        <div id="book-duplicate-bar" class="book-duplicate-bar">
+          <div class="duplicate-bar-left">
+            <span class="duplicate-bar-icon">📋</span>
+            <div class="duplicate-bar-text">
+              <span class="duplicate-bar-label">Duplicate from Existing Book</span>
+              <span class="duplicate-bar-hint">Pre-fill fields from any book in your series or catalogue</span>
+            </div>
+          </div>
+          <div class="duplicate-bar-right">
+            <select id="book-duplicate-source-select" class="duplicate-source-select" aria-label="Select source book to duplicate">
+              <option value="">— Select book template —</option>
+            </select>
+            <button type="button" id="book-duplicate-apply-btn" class="btn-subtle btn-sm" disabled>
+              Apply
+            </button>
+            <button type="button" id="book-duplicate-clear-btn" class="btn-subtle btn-sm hidden" title="Clear template and start blank">
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Duplication Active Context Banner -->
+        <div id="book-duplicate-banner" class="book-duplicate-banner hidden">
+          <span class="badge-duplicating">📋 Cloned Entry</span>
+          <span id="book-duplicate-banner-desc">Fields pre-filled from template. Modify details below and save as a new book.</span>
+        </div>
+
         <div class="modal-grid-2">
           <div class="form-field">
             <label for="book-field-series">Series Curriculum *</label>
@@ -1470,6 +1498,6 @@
     </div>
   </div>
 
-  <script src="/admin/admin.js?v=2.6"></script>
+  <script src="/admin/admin.js?v=2.7"></script>
 </body>
 </html>
