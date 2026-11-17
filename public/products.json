@@ -3,7 +3,7 @@
     {
       "id": "islamic-studies",
       "label": "Islamic Studies Series",
-      "tagline": "A complete curriculum — Grades 1 to 9",
+      "tagline": "A complete curriculum — Grades 1 to 7",
       "description": "A carefully structured Islamic Studies programme that grows with the learner. Each grade contains four modules, weaving belief, action, du'as, etiquettes, history, and Qur'anic understanding into one connected journey.",
       "color": "#0878c9",
       "colorLight": "#e7f2ff",
@@ -45,13 +45,31 @@
           "whatsappMessage": "Assalamu Alaikum! I am interested in ordering the EduBuds Islamic Studies Grade 4 book. Could you please share details on pricing, availability, and how to place an order?"
         },
         {
-          "id": "is-grades-5-9",
+          "id": "is-grade-5",
           "title": "Islamic Studies",
-          "subtitle": "Grades 5–9",
-          "image": "/assets/Resource/Grade 1 Cover.jpg",
-          "tags": ["Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Curriculum"],
-          "description": "The complete upper curriculum — Grades 5 through 9 continue to build a well-rounded Islamic identity, preparing young Muslims for adulthood with knowledge, practice, and character.",
-          "whatsappMessage": "Assalamu Alaikum! I am interested in enquiring about the EduBuds Islamic Studies books for Grades 5 to 9. Could you please share details on availability and how to place an order?"
+          "subtitle": "Grade 5",
+          "image": "https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794577012570-grade-5-dRazkrIDg6SoEgkXKnaCjnHqMOiKaA.webp",
+          "tags": ["Grade 5", "Curriculum"],
+          "description": "Grade 5 marks a pivotal year — students engage with deeper aspects of creed, history, and the Qur'an, preparing them for the middle years.",
+          "whatsappMessage": "Assalamu Alaikum! I am interested in ordering the EduBuds \"Islamic Studies (Grade 5)\". Could you please share details on pricing, availability, and how to place an order?"
+        },
+        {
+          "id": "is-grade-6",
+          "title": "Islamic Studies",
+          "subtitle": "Grade 6",
+          "image": "https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794656786884-grade-6-JZSN41bHdsj769qjXNBBL2QqtlGqWV.webp",
+          "tags": ["Grade 6", "Curriculum"],
+          "description": "Grade 6 marks a pivotal year — students engage with deeper aspects of creed, history, and the Qur'an, preparing them for the middle years.",
+          "whatsappMessage": "Assalamu Alaikum! I am interested in ordering the EduBuds \"Islamic Studies (Grade 6)\". Could you please share details on pricing, availability, and how to place an order?"
+        },
+        {
+          "id": "is-grade-7",
+          "title": "Islamic Studies",
+          "subtitle": "Grade 7",
+          "image": "https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794656868336-grade-7-S5guNLBLNEjC1GXQlCxAWrE2oZ97GC.webp",
+          "tags": ["Grade 7", "Curriculum"],
+          "description": "Grade 7 marks a pivotal year — students engage with deeper aspects of creed, history, and the Qur'an, preparing them for the middle years.",
+          "whatsappMessage": "Assalamu Alaikum! I am interested in ordering the EduBuds \"Islamic Studies (Grade 7)\". Could you please share details on pricing, availability, and how to place an order?"
         }
       ]
     },

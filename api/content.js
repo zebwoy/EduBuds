@@ -4,15 +4,15 @@ export const DEFAULT_CONTENT = {
   hero: {
     eyebrow: 'MORE THAN BOOKS',
     heading: 'Islamic Studies.<br><em>Made complete.</em>',
-    lead: 'Give Islamic learning the same thoughtful structure as any other school subject. EduBuds brings knowledge, practice, and character together — across three carefully crafted series, designed to grow with your child from Grade 1 all the way to Grade 9.',
+    lead: 'Give Islamic learning the same thoughtful structure as any other school subject. EduBuds brings knowledge, practice, and character together — across three carefully crafted series, designed to grow with your child from Grade 1 all the way to Grade 7.',
     ctaPrimaryText: 'Explore the curriculum ↗',
     ctaPrimaryLink: '#curriculum',
     ctaSecondaryText: 'Browse the books →',
     ctaSecondaryLink: '#books',
-    trustPills: ['GRADES 1–9', '3 SERIES', 'ONE JOURNEY']
+    trustPills: ['GRADES 1–7', '3 SERIES', 'ONE JOURNEY']
   },
   stats: {
-    stat1Num: '9', stat1Label: 'Grade levels',
+    stat1Num: '7', stat1Label: 'Grade levels',
     stat2Num: '3', stat2Label: 'Book series',
     stat3Num: '6', stat3Label: 'Learning strands',
     stat4Num: '1', stat4Label: 'Connected programme'
@@ -20,7 +20,7 @@ export const DEFAULT_CONTENT = {
   marquee: {
     items: [
       '✦ &nbsp; A complete Islamic Studies programme for growing minds',
-      'Grades 1–9 &nbsp; • &nbsp; 3 Series &nbsp; • &nbsp; One connected journey',
+      'Grades 1–7 &nbsp; • &nbsp; 3 Series &nbsp; • &nbsp; One connected journey',
       'Islamic Studies &nbsp; · &nbsp; Prophet Stories &nbsp; · &nbsp; 20 Hadith Collection',
       'Knowledge · Practice · Character'
     ]
@@ -28,7 +28,7 @@ export const DEFAULT_CONTENT = {
   curriculum: {
     eyebrow: 'THE EDUBUDS CURRICULUM',
     heading: 'A complete journey,<br><em>thoughtfully woven.</em>',
-    lead: 'Across all nine grades, six essential strands of Islamic learning are carefully balanced throughout every module — creating variety, depth, and continuity in a single connected programme.',
+    lead: 'Across all seven grades, six essential strands of Islamic learning are carefully balanced throughout every module — creating variety, depth, and continuity in a single connected programme.',
     strands: [
       { num: '01', icon: '☼', name: 'Belief', desc: 'Build a meaningful foundation in what children believe and why it truly matters.', color: 'strand-blue' },
       { num: '02', icon: '❋', name: 'Action', desc: 'Connect knowledge to worship, choices, and everyday practice — seamlessly.', color: 'strand-green' },
@@ -43,7 +43,7 @@ export const DEFAULT_CONTENT = {
     heading: 'Not just what they know.<br><em>Who they become.</em>',
     lead: 'We believe Islamic Studies should be more than isolated lessons. EduBuds is designed to bring beliefs, actions, supplications, manners, stories, and Qur\'anic understanding into a connected learning experience — one that shapes the whole child, not just their answers.',
     pillars: [
-      { icon: '📖', title: 'Meaningful Knowledge', desc: 'Structured learning across nine grades — every concept building on the last.' },
+      { icon: '📖', title: 'Meaningful Knowledge', desc: 'Structured learning across seven grades — every concept building on the last.' },
       { icon: '🌱', title: 'Everyday Practice', desc: 'Six strands woven through every module, connecting belief to daily life.' },
       { icon: '✨', title: 'Lasting Character', desc: 'Learning that shapes who children are — not just what they can recall.' }
     ]
@@ -53,7 +53,7 @@ export const DEFAULT_CONTENT = {
     heading: 'Make space for<br><em>meaningful learning.</em>',
     lead: 'You already think carefully about your child\'s education. EduBuds brings that same intentionality to Islamic Studies — a clear curriculum framework that supports teaching, conversation, and growth far beyond the page.',
     cards: [
-      { num: '01', title: 'Clear progression', body: 'Understand the full journey from Grade 1 through Grade 9 — no guesswork.' },
+      { num: '01', title: 'Clear progression', body: 'Understand the full journey from Grade 1 through Grade 7 — no guesswork.' },
       { num: '02', title: 'Balanced learning', body: 'Six strands woven through every grade — belief, action, du\'as, etiquettes, history, and Qur\'an.' },
       { num: '03', title: 'Learning that lasts', body: 'Books designed to connect understanding with practice — and practice with character.' },
       { num: '04', title: 'Beautiful by design', body: 'Carefully illustrated, clearly laid out — because how something looks shapes how it\'s received.' }
