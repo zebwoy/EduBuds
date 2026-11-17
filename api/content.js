@@ -1,4 +1,4 @@
-import { getAllContent } from '../lib/db.js';
+import { getAllContent, getAllBooks } from '../lib/db.js';
 
 export const DEFAULT_CONTENT = {
   hero: {
@@ -88,6 +88,50 @@ export default async function handler(req, res) {
       if (val && typeof val === 'object') {
         merged[key] = { ...merged[key], ...val };
       }
+    }
+
+    // Dynamically harmonize grade mentions based on actual published Islamic Studies books
+    try {
+      const islamicBooks = await getAllBooks('islamic-studies');
+      const activeBooks = (islamicBooks || []).filter(b => b.isPublished !== false);
+      if (activeBooks.length > 0) {
+        const gradeNumbers = activeBooks.map(b => {
+          const m = (b.subtitle || b.title || b.id || '').match(/grade[-_\s]*(\d+)/i);
+          return m ? parseInt(m[1], 10) : null;
+        }).filter(n => n !== null);
+
+        const minGrade = gradeNumbers.length > 0 ? Math.min(...gradeNumbers) : 1;
+        const maxGrade = gradeNumbers.length > 0 ? Math.max(...gradeNumbers) : activeBooks.length;
+        const count = activeBooks.length;
+        const numWords = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+        const countWord = numWords[count] || String(count);
+
+        if (merged.stats) {
+          merged.stats.stat1Num = String(count);
+        }
+        if (merged.hero) {
+          if (Array.isArray(merged.hero.trustPills)) {
+            merged.hero.trustPills = merged.hero.trustPills.map(p => p.replace(/GRADES\s*1[-–]\d+/i, `GRADES ${minGrade}–${maxGrade}`));
+          }
+          if (merged.hero.lead) {
+            merged.hero.lead = merged.hero.lead.replace(/Grade\s*1\s+all\s+the\s+way\s+to\s+Grade\s*\d+/i, `Grade ${minGrade} all the way to Grade ${maxGrade}`);
+          }
+        }
+        if (merged.marquee && Array.isArray(merged.marquee.items)) {
+          merged.marquee.items = merged.marquee.items.map(m => m.replace(/Grades\s*1[-–]\d+/i, `Grades ${minGrade}–${maxGrade}`));
+        }
+        if (merged.curriculum && merged.curriculum.lead) {
+          merged.curriculum.lead = merged.curriculum.lead.replace(/Across\s+all\s+\w+\s+grades/i, `Across all ${countWord} grades`);
+        }
+        if (merged.approach && Array.isArray(merged.approach.pillars) && merged.approach.pillars[0]) {
+          merged.approach.pillars[0].desc = merged.approach.pillars[0].desc.replace(/across\s+\w+\s+grades/i, `across ${countWord} grades`);
+        }
+        if (merged.parents && Array.isArray(merged.parents.cards) && merged.parents.cards[0]) {
+          merged.parents.cards[0].body = merged.parents.cards[0].body.replace(/Grade\s*1\s+through\s+Grade\s*\d+/i, `Grade ${minGrade} through Grade ${maxGrade}`);
+        }
+      }
+    } catch (calcErr) {
+      // Graceful fallback to static merged content
     }
 
     res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=60');
