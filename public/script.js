@@ -133,30 +133,66 @@ const globalRevealObserver = new IntersectionObserver((entries) => {
 })();
 
 /* ── Animated Counter ────────────────────────────────────── */
+function animateStatCounter(el) {
+  if (!el) return;
+  if (el._countRafId) {
+    cancelAnimationFrame(el._countRafId);
+    el._countRafId = null;
+  }
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const target = parseInt(el.dataset.count, 10) || 0;
+    el.textContent = String(target);
+    el._countAnimated = true;
+    return;
+  }
+
+  const duration = 1200;
+  const start = performance.now();
+
+  function step(now) {
+    // Always read live dataset.count so async API hydration never gets overwritten
+    const target = parseInt(el.dataset.count, 10) || 0;
+    const progress = Math.min((now - start) / duration, 1);
+    // Ease out cubic
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = String(Math.round(eased * target));
+    if (progress < 1) {
+      el._countRafId = requestAnimationFrame(step);
+    } else {
+      el.textContent = String(target);
+      el._countRafId = null;
+      el._countAnimated = true;
+    }
+  }
+
+  el._countRafId = requestAnimationFrame(step);
+}
+
+function setStatCounterValue(el, newValue) {
+  if (!el) return;
+  const parsed = parseInt(newValue, 10);
+  if (Number.isNaN(parsed)) return;
+
+  el.dataset.count = String(parsed);
+
+  // If animation is in-flight, step() reads live dataset.count and converges seamlessly
+  if (el._countRafId) return;
+
+  // If already animated or visible with a number, reflect updated value immediately
+  if (el._countAnimated || parseInt(el.textContent, 10) > 0) {
+    el.textContent = String(parsed);
+  }
+}
+
 (function initCounters() {
   const counters = $$('[data-count]');
   if (!counters.length) return;
 
-  function animateCount(el) {
-    const target = parseInt(el.dataset.count, 10);
-    const duration = 1200;
-    const start = performance.now();
-
-    function step(now) {
-      const progress = Math.min((now - start) / duration, 1);
-      // Ease out cubic
-      const eased = 1 - Math.pow(1 - progress, 3);
-      el.textContent = Math.round(eased * target);
-      if (progress < 1) requestAnimationFrame(step);
-    }
-
-    requestAnimationFrame(step);
-  }
-
   const io = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        animateCount(entry.target);
+        animateStatCounter(entry.target);
         io.unobserve(entry.target);
       }
     });
@@ -456,7 +492,7 @@ const PRODUCTS_DATA = {
   $$('.book-card', gridEl).forEach(card => revealObserver.observe(card));
 
   // Expose global series switcher for hero float cards & navigation
-  window.selectSeries = function(id) {
+  window.selectSeries = function (id) {
     setActive(id);
     const booksEl = document.getElementById('books');
     if (booksEl) {
@@ -635,8 +671,7 @@ async function syncContentFromApi() {
           const numEl = el.querySelector('.stat-num');
           const labelEl = el.querySelector('.stat-label');
           if (numEl) {
-            numEl.dataset.count = pair.num;
-            numEl.textContent = pair.num;
+            setStatCounterValue(numEl, pair.num);
           }
           if (labelEl && pair.label) labelEl.textContent = pair.label;
         }
@@ -734,8 +769,8 @@ function extractGradeInfo(seriesData) {
   }
 
   const islamicSeries = seriesData.find(s => s.id === 'islamic-studies') ||
-                        seriesData.find(s => /islamic\s*studies/i.test(s.label || '')) ||
-                        seriesData[0];
+    seriesData.find(s => /islamic\s*studies/i.test(s.label || '')) ||
+    seriesData[0];
 
   const gradeBooks = (islamicSeries && Array.isArray(islamicSeries.books)) ? islamicSeries.books : [];
 
@@ -780,8 +815,7 @@ function applyDynamicGradesToDOM(info) {
     const numEl = statItems[0].querySelector('.stat-num');
     const labEl = statItems[0].querySelector('.stat-label');
     if (numEl) {
-      numEl.dataset.count = gradeCount;
-      numEl.textContent = gradeCount;
+      setStatCounterValue(numEl, gradeCount);
     }
     if (labEl) labEl.textContent = 'Grade levels';
   }
@@ -888,8 +922,8 @@ applyDynamicGradesToDOM(window.__edubudsGradeInfo);
 function updatePageFromSeries(seriesData) {
   if (!seriesData || !Array.isArray(seriesData) || seriesData.length === 0) return;
 
-  const totalSeries  = seriesData.length;
-  const totalBooks   = seriesData.reduce((sum, s) => sum + (s.books ? s.books.length : 0), 0);
+  const totalSeries = seriesData.length;
+  const totalBooks = seriesData.reduce((sum, s) => sum + (s.books ? s.books.length : 0), 0);
 
   // Derive dynamic grade metrics from the live Islamic Studies catalogue
   const gradeInfo = extractGradeInfo(seriesData);
@@ -901,8 +935,7 @@ function updatePageFromSeries(seriesData) {
     const numEl = statItems[0].querySelector('.stat-num');
     const labEl = statItems[0].querySelector('.stat-label');
     if (numEl) {
-      numEl.dataset.count = gradeInfo.gradeCount;
-      numEl.textContent   = gradeInfo.gradeCount;
+      setStatCounterValue(numEl, gradeInfo.gradeCount);
     }
     if (labEl) labEl.textContent = 'Grade levels';
   }
@@ -910,8 +943,7 @@ function updatePageFromSeries(seriesData) {
     const numEl = statItems[1].querySelector('.stat-num');
     const labEl = statItems[1].querySelector('.stat-label');
     if (numEl) {
-      numEl.dataset.count = totalSeries;
-      numEl.textContent   = totalSeries;
+      setStatCounterValue(numEl, totalSeries);
     }
     if (labEl) labEl.textContent = 'Book series';
   }
