@@ -48,6 +48,28 @@ export default async function handler(req, res) {
           .map(({ series_id, ...book }) => book)
       }));
 
+      // Dynamically harmonize Islamic Studies tagline based on active books
+      seriesMap.forEach(s => {
+        if (s.id === 'islamic-studies' || /islamic\s*studies/i.test(s.label || '')) {
+          const bks = s.books || [];
+          if (bks.length > 0) {
+            let hasPP = false;
+            let maxG = 0;
+            bks.forEach(b => {
+              const str = `${b.subtitle || ''} ${b.title || ''} ${b.id || ''}`;
+              if (/pre[-_\s]*primer/i.test(str)) hasPP = true;
+              const m = str.match(/grade[-_\s]*(\d+)/i);
+              if (m) {
+                const num = parseInt(m[1], 10);
+                if (num > maxG) maxG = num;
+              }
+            });
+            const r = hasPP ? `Pre-Primer – Grade ${maxG || bks.length}` : `Grades 1 to ${maxG || bks.length}`;
+            s.tagline = `A complete curriculum — ${r}`;
+          }
+        }
+      });
+
       // Rapid edge revalidation (30s edge, 60s stale) so CMS edits sync almost immediately
       res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=60');
       return res.status(200).json({ series: seriesMap });

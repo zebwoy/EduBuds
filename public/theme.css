@@ -1199,6 +1199,12 @@ em { font-style: normal; color: var(--green); }
   border-color: rgba(255,255,255,0.4);
 }
 
+.grade-orb.grade-orb-foundation {
+  font-size: 11px;
+  letter-spacing: -0.5px;
+  font-weight: 800;
+}
+
 .grade-orb:nth-child(3n+1) { background: var(--yellow); color: var(--navy); border-color: transparent; }
 .grade-orb:nth-child(3n+2) { background: var(--green); border-color: transparent; }
 .grade-orb:nth-child(3n)   { background: var(--blue); border-color: transparent; }

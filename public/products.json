@@ -3,11 +3,29 @@
     {
       "id": "islamic-studies",
       "label": "Islamic Studies Series",
-      "tagline": "A complete curriculum — Grades 1 to 7",
+      "tagline": "A complete curriculum — Pre-Primer – Grade 8",
       "description": "A carefully structured Islamic Studies programme that grows with the learner. Each grade contains four modules, weaving belief, action, du'as, etiquettes, history, and Qur'anic understanding into one connected journey.",
       "color": "#0878c9",
       "colorLight": "#e7f2ff",
       "books": [
+        {
+          "id": "is-grade-pp1",
+          "title": "Islamic Studies",
+          "subtitle": "Pre-Primer 1",
+          "image": "https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794999956899-islamic-studies-pre-primer-workbook-cover-BHhd0lsCWeFDmwPPkD14FLe3acsF2y.png",
+          "tags": ["Pre-Primer 1", "Curriculum"],
+          "description": "The foundation year — introducing children to belief, practice, and the beauty of being Muslim through age-appropriate stories and activities.",
+          "whatsappMessage": "Assalamu Alaikum! I am interested in ordering the EduBuds \"Islamic Studies (Pre-Primer 1)\". Could you please share details on pricing, availability, and how to place an order?"
+        },
+        {
+          "id": "is-grade-pp2",
+          "title": "Islamic Studies",
+          "subtitle": "Pre-Primer 2",
+          "image": "https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794999885973-islamic-studies-pre-primer-2-cover-qgSNd5BLdPOfe1c1qjaJoI6ABtnGNi.png",
+          "tags": ["Pre-Primer 2", "Curriculum"],
+          "description": "The foundation year — introducing children to belief, practice, and the beauty of being Muslim through age-appropriate stories and activities.",
+          "whatsappMessage": "Assalamu Alaikum! I am interested in ordering the EduBuds \"Islamic Studies (Pre-Primer 2)\". Could you please share details on pricing, availability, and how to place an order?"
+        },
         {
           "id": "is-grade-1",
           "title": "Islamic Studies",
@@ -70,6 +88,15 @@
           "tags": ["Grade 7", "Curriculum"],
           "description": "Grade 7 marks a pivotal year — students engage with deeper aspects of creed, history, and the Qur'an, preparing them for the middle years.",
           "whatsappMessage": "Assalamu Alaikum! I am interested in ordering the EduBuds \"Islamic Studies (Grade 7)\". Could you please share details on pricing, availability, and how to place an order?"
+        },
+        {
+          "id": "is-grade-8",
+          "title": "Islamic Studies",
+          "subtitle": "Grade 8",
+          "image": "https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794925124848-edubuds-islamic-studies-grade-3-cover-zw6XdelohKoTceHNZsIC7MUJVVtt5N.png",
+          "tags": ["Grade 8", "Curriculum"],
+          "description": "Grade 8 marks a pivotal year — students engage with deeper aspects of creed, history, and the Qur'an, preparing them for the middle years.",
+          "whatsappMessage": "Assalamu Alaikum! I am interested in ordering the EduBuds \"Islamic Studies (Grade 8)\". Could you please share details on pricing, availability, and how to place an order?"
         }
       ]
     },

@@ -4,15 +4,15 @@ export const DEFAULT_CONTENT = {
   hero: {
     eyebrow: 'MORE THAN BOOKS',
     heading: 'Islamic Studies.<br><em>Made complete.</em>',
-    lead: 'Give Islamic learning the same thoughtful structure as any other school subject. EduBuds brings knowledge, practice, and character together — across three carefully crafted series, designed to grow with your child from Grade 1 all the way to Grade 7.',
+    lead: 'Give Islamic learning the same thoughtful structure as any other school subject. EduBuds brings knowledge, practice, and character together — across multiple carefully crafted series, designed to grow with your child from Pre-Primer all the way to Grade 8.',
     ctaPrimaryText: 'Explore the curriculum ↗',
     ctaPrimaryLink: '#curriculum',
     ctaSecondaryText: 'Browse the books →',
     ctaSecondaryLink: '#books',
-    trustPills: ['GRADES 1–7', '3 SERIES', 'ONE JOURNEY']
+    trustPills: ['PRE-PRIMER – GRADE 8', '3 SERIES', 'ONE JOURNEY']
   },
   stats: {
-    stat1Num: '7', stat1Label: 'Grade levels',
+    stat1Num: '10', stat1Label: 'Learning + Grade Levels',
     stat2Num: '3', stat2Label: 'Book series',
     stat3Num: '6', stat3Label: 'Learning strands',
     stat4Num: '1', stat4Label: 'Connected programme'
@@ -20,7 +20,7 @@ export const DEFAULT_CONTENT = {
   marquee: {
     items: [
       '✦ &nbsp; A complete Islamic Studies programme for growing minds',
-      'Grades 1–7 &nbsp; • &nbsp; 3 Series &nbsp; • &nbsp; One connected journey',
+      'Pre-Primer – Grade 8 &nbsp; • &nbsp; 3 Series &nbsp; • &nbsp; One connected journey',
       'Islamic Studies &nbsp; · &nbsp; Prophet Stories &nbsp; · &nbsp; 20 Hadith Collection',
       'Knowledge · Practice · Character'
     ]
@@ -28,7 +28,7 @@ export const DEFAULT_CONTENT = {
   curriculum: {
     eyebrow: 'THE EDUBUDS CURRICULUM',
     heading: 'A complete journey,<br><em>thoughtfully woven.</em>',
-    lead: 'Across all seven grades, six essential strands of Islamic learning are carefully balanced throughout every module — creating variety, depth, and continuity in a single connected programme.',
+    lead: 'Across all ten learning levels, six essential strands of Islamic learning are carefully balanced throughout every module — creating variety, depth, and continuity in a single connected programme.',
     strands: [
       { num: '01', icon: '☼', name: 'Belief', desc: 'Build a meaningful foundation in what children believe and why it truly matters.', color: 'strand-blue' },
       { num: '02', icon: '❋', name: 'Action', desc: 'Connect knowledge to worship, choices, and everyday practice — seamlessly.', color: 'strand-green' },
@@ -53,7 +53,7 @@ export const DEFAULT_CONTENT = {
     heading: 'Make space for<br><em>meaningful learning.</em>',
     lead: 'You already think carefully about your child\'s education. EduBuds brings that same intentionality to Islamic Studies — a clear curriculum framework that supports teaching, conversation, and growth far beyond the page.',
     cards: [
-      { num: '01', title: 'Clear progression', body: 'Understand the full journey from Grade 1 through Grade 7 — no guesswork.' },
+      { num: '01', title: 'Clear progression', body: 'Understand the full journey from Pre-Primer through Grade 8 — no guesswork.' },
       { num: '02', title: 'Balanced learning', body: 'Six strands woven through every grade — belief, action, du\'as, etiquettes, history, and Qur\'an.' },
       { num: '03', title: 'Learning that lasts', body: 'Books designed to connect understanding with practice — and practice with character.' },
       { num: '04', title: 'Beautiful by design', body: 'Carefully illustrated, clearly laid out — because how something looks shapes how it\'s received.' }
@@ -95,39 +95,63 @@ export default async function handler(req, res) {
       const islamicBooks = await getAllBooks('islamic-studies');
       const activeBooks = (islamicBooks || []).filter(b => b.isPublished !== false);
       if (activeBooks.length > 0) {
-        const gradeNumbers = activeBooks.map(b => {
-          const m = (b.subtitle || b.title || b.id || '').match(/grade[-_\s]*(\d+)/i);
-          return m ? parseInt(m[1], 10) : null;
-        }).filter(n => n !== null);
+        let prePrimerCount = 0;
+        const gradeNumbers = [];
 
+        activeBooks.forEach(b => {
+          const str = `${b.subtitle || ''} ${b.title || ''} ${b.id || ''}`;
+          if (/pre[-_\s]*primer/i.test(str)) {
+            prePrimerCount++;
+          } else {
+            const m = str.match(/grade[-_\s]*(\d+)/i);
+            if (m) gradeNumbers.push(parseInt(m[1], 10));
+          }
+        });
+
+        const hasPrePrimer = prePrimerCount > 0;
         const minGrade = gradeNumbers.length > 0 ? Math.min(...gradeNumbers) : 1;
         const maxGrade = gradeNumbers.length > 0 ? Math.max(...gradeNumbers) : activeBooks.length;
         const count = activeBooks.length;
-        const numWords = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+        const numWords = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen'];
         const countWord = numWords[count] || String(count);
+
+        const rangeLabel = hasPrePrimer ? `Pre-Primer – Grade ${maxGrade}` : `Grades ${minGrade}–${maxGrade}`;
+        const rangeText = hasPrePrimer ? `Pre-Primer to Grade ${maxGrade}` : `Grade ${minGrade} to Grade ${maxGrade}`;
+        const rangeThrough = hasPrePrimer ? `Pre-Primer through Grade ${maxGrade}` : `Grade ${minGrade} through Grade ${maxGrade}`;
 
         if (merged.stats) {
           merged.stats.stat1Num = String(count);
+          merged.stats.stat1Label = 'Learning + Grade Levels';
         }
         if (merged.hero) {
           if (Array.isArray(merged.hero.trustPills)) {
-            merged.hero.trustPills = merged.hero.trustPills.map(p => p.replace(/GRADES\s*1[-–]\d+/i, `GRADES ${minGrade}–${maxGrade}`));
+            merged.hero.trustPills = merged.hero.trustPills.map(p =>
+              p.replace(/(?:GRADES\s*\d+[-–]\d+|PRE-PRIMER\s*[-–]\s*GRADE\s*\d+)/i, rangeLabel.toUpperCase())
+            );
           }
           if (merged.hero.lead) {
-            merged.hero.lead = merged.hero.lead.replace(/Grade\s*1\s+all\s+the\s+way\s+to\s+Grade\s*\d+/i, `Grade ${minGrade} all the way to Grade ${maxGrade}`);
+            if (hasPrePrimer) {
+              merged.hero.lead = merged.hero.lead.replace(/(?:Grade\s*1|from\s+Grade\s*\d+|from\s+Pre-Primer)\s+all\s+the\s+way\s+to\s+Grade\s*\d+/i, `from Pre-Primer all the way to Grade ${maxGrade}`);
+            } else {
+              merged.hero.lead = merged.hero.lead.replace(/(?:Grade\s*1|from\s+Grade\s*\d+)\s+all\s+the\s+way\s+to\s+Grade\s*\d+/i, `from Grade ${minGrade} all the way to Grade ${maxGrade}`);
+            }
           }
         }
         if (merged.marquee && Array.isArray(merged.marquee.items)) {
-          merged.marquee.items = merged.marquee.items.map(m => m.replace(/Grades\s*1[-–]\d+/i, `Grades ${minGrade}–${maxGrade}`));
+          merged.marquee.items = merged.marquee.items.map(m =>
+            m.replace(/(?:Grades?\s*\d+[-–]\d+|Pre-Primer\s*[-–]\s*Grade\s*\d+)/i, rangeLabel)
+          );
         }
         if (merged.curriculum && merged.curriculum.lead) {
-          merged.curriculum.lead = merged.curriculum.lead.replace(/Across\s+all\s+\w+\s+grades/i, `Across all ${countWord} grades`);
+          const levelDesc = hasPrePrimer ? `${countWord} learning levels` : `${countWord} grades`;
+          merged.curriculum.lead = merged.curriculum.lead.replace(/Across\s+all\s+\w+\s+(?:grades|learning levels)/i, `Across all ${levelDesc}`);
         }
         if (merged.approach && Array.isArray(merged.approach.pillars) && merged.approach.pillars[0]) {
-          merged.approach.pillars[0].desc = merged.approach.pillars[0].desc.replace(/across\s+\w+\s+grades/i, `across ${countWord} grades`);
+          const levelDesc = hasPrePrimer ? `${countWord} learning levels` : `${countWord} grades`;
+          merged.approach.pillars[0].desc = merged.approach.pillars[0].desc.replace(/across\s+\w+\s+(?:grades|learning levels)/i, `across ${levelDesc}`);
         }
         if (merged.parents && Array.isArray(merged.parents.cards) && merged.parents.cards[0]) {
-          merged.parents.cards[0].body = merged.parents.cards[0].body.replace(/Grade\s*1\s+through\s+Grade\s*\d+/i, `Grade ${minGrade} through Grade ${maxGrade}`);
+          merged.parents.cards[0].body = merged.parents.cards[0].body.replace(/(?:Grade\s*1|Pre-Primer)\s+through\s+Grade\s*\d+/i, rangeThrough);
         }
       }
     } catch (calcErr) {

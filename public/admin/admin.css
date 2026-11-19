@@ -1311,6 +1311,25 @@ body.drawer-locked {
   flex-direction: column;
   min-width: 0;
 }
+.book-meta-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.book-order-pill {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+  letter-spacing: 0.03em;
+  user-select: none;
+}
 .book-series-pill {
   align-self: flex-start;
   font-size: 0.7rem;
@@ -1318,7 +1337,6 @@ body.drawer-locked {
   padding: 3px 10px;
   border-radius: 999px;
   color: #fff;
-  margin-bottom: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1382,6 +1400,36 @@ body.drawer-locked {
   color: var(--text-muted);
   cursor: pointer;
   user-select: none;
+}
+
+.book-order-controls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn-order-move {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all var(--transition-fast);
+}
+.btn-order-move:hover:not(:disabled) {
+  background: rgba(8, 120, 201, 0.18);
+  color: var(--color-primary-400);
+  border-color: rgba(8, 120, 201, 0.45);
+  transform: translateY(-1px);
+}
+.btn-order-move:disabled {
+  opacity: 0.22;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .card-action-btns {

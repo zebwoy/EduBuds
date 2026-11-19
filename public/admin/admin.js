@@ -1201,6 +1201,20 @@ function renderBooksGrid() {
     const seriesColor = seriesObj.color || book.seriesColor || '#0878c9';
     const seriesLabel = seriesObj.label || book.seriesLabel || book.seriesId || 'Curriculum';
 
+    // Calculate sequential order within its series
+    const targetSeriesId = book.seriesId || book.series_id;
+    const seriesBooks = state.books
+      .filter(b => (b.seriesId || b.series_id) === targetSeriesId)
+      .sort((a, b) => {
+        const oA = a.orderIndex ?? a.order_index ?? 0;
+        const oB = b.orderIndex ?? b.order_index ?? 0;
+        return oA - oB;
+      });
+    const seriesIndex = seriesBooks.findIndex(b => b.id === book.id);
+    const orderInSeries = seriesIndex >= 0 ? seriesIndex + 1 : (book.orderIndex ?? book.order_index ?? 0) + 1;
+    const canMoveEarlier = seriesIndex > 0;
+    const canMoveLater = seriesIndex >= 0 && seriesIndex < seriesBooks.length - 1;
+
     const hasActiveCover = Boolean(book.image && !book.image.startsWith('/assets/Resource/') && !book.image.includes('placeholder-cover'));
     const matchedAsset = !hasActiveCover ? findMatchingAssetForBook(book) : null;
 
@@ -1212,7 +1226,10 @@ function renderBooksGrid() {
       <div class="book-admin-header">
         <img class="book-admin-cover" src="${escapeHtml(book.image || '/assets/placeholder-cover.svg')}" alt="${escapeHtml(book.title)}" loading="lazy" onerror="this.onerror=null; this.src='/assets/placeholder-cover.svg'">
         <div class="book-admin-meta">
-          <span class="book-series-pill" style="background:${seriesColor}">${escapeHtml(seriesLabel)}</span>
+          <div class="book-meta-top">
+            <span class="book-series-pill" style="background:${seriesColor}">${escapeHtml(seriesLabel)}</span>
+            <span class="book-order-pill" title="Order Index in Series: #${orderInSeries} (order_index: ${book.orderIndex ?? book.order_index ?? 0})">#${orderInSeries}</span>
+          </div>
           <h4 class="book-admin-title" title="${escapeHtml(book.title)}">${escapeHtml(book.title)}</h4>
           <span class="book-admin-subtitle">${book.subtitle ? escapeHtml(book.subtitle) : '&nbsp;'}</span>
           <span class="book-admin-id-tag">ID: ${escapeHtml(book.id)}</span>
@@ -1239,6 +1256,15 @@ function renderBooksGrid() {
           </span>
           <span class="status-text">${book.isPublished ? 'Live' : 'Draft'}</span>
         </label>
+
+        <div class="book-order-controls" title="Change display order in series">
+          <button type="button" class="btn-order-move btn-move-earlier" data-id="${escapeHtml(book.id)}" title="Move Earlier (swap with #${orderInSeries - 1})" ${!canMoveEarlier ? 'disabled' : ''}>
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <button type="button" class="btn-order-move btn-move-later" data-id="${escapeHtml(book.id)}" title="Move Later (swap with #${orderInSeries + 1})" ${!canMoveLater ? 'disabled' : ''}>
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
 
         <div class="card-action-btns">
           <button type="button" class="icon-action-btn duplicate-btn duplicate-book-btn" data-id="${escapeHtml(book.id)}" title="Duplicate this book as a new entry">
@@ -1303,6 +1329,20 @@ function renderBooksGrid() {
       openDeleteModal('book', bookId, b ? b.title : bookId);
     });
   });
+
+  booksGridEl.querySelectorAll('.btn-move-earlier').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await handleMoveBook(btn.dataset.id, -1);
+    });
+  });
+
+  booksGridEl.querySelectorAll('.btn-move-later').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await handleMoveBook(btn.dataset.id, 1);
+    });
+  });
 }
 
 if (catalogueSearchInput) {
@@ -1346,6 +1386,88 @@ async function handleToggleBookPublish(bookId, isPublished, inputEl) {
   } catch (err) {
     if (inputEl) inputEl.checked = !isPublished;
     showToast(err.message || 'Could not update publication status.', 'error');
+  }
+}
+
+/* ── Dynamic Book Reordering (Move Earlier / Later) ───────── */
+async function handleMoveBook(bookId, direction) {
+  const book = state.books.find(b => b.id === bookId);
+  if (!book) return;
+
+  const targetSeriesId = book.seriesId || book.series_id;
+  // Get all books in this series sorted by current orderIndex
+  const seriesBooks = state.books
+    .filter(b => (b.seriesId || b.series_id) === targetSeriesId)
+    .sort((a, b) => {
+      const oA = a.orderIndex ?? a.order_index ?? 0;
+      const oB = b.orderIndex ?? b.order_index ?? 0;
+      return oA - oB;
+    });
+
+  const currIdx = seriesBooks.findIndex(b => b.id === bookId);
+  if (currIdx < 0) return;
+
+  const newIdx = currIdx + direction;
+  if (newIdx < 0 || newIdx >= seriesBooks.length) return;
+
+  // Snapshot previous state for rollback on error
+  const prevOrderMap = new Map();
+  seriesBooks.forEach(b => {
+    prevOrderMap.set(b.id, b.orderIndex ?? b.order_index ?? 0);
+  });
+
+  // Swap elements in seriesBooks
+  const [movedBook] = seriesBooks.splice(currIdx, 1);
+  seriesBooks.splice(newIdx, 0, movedBook);
+
+  // Update orderIndex sequentially on all books in this series
+  seriesBooks.forEach((b, i) => {
+    b.orderIndex = i;
+    b.order_index = i;
+    const globalB = state.books.find(x => x.id === b.id);
+    if (globalB) {
+      globalB.orderIndex = i;
+      globalB.order_index = i;
+    }
+  });
+
+  // Re-sort state.books so everything stays consistently ordered
+  state.books.sort((a, b) => {
+    const sA = (a.seriesId || a.series_id) || '';
+    const sB = (b.seriesId || b.series_id) || '';
+    if (sA !== sB) return sA.localeCompare(sB);
+    return (a.orderIndex ?? a.order_index ?? 0) - (b.orderIndex ?? b.order_index ?? 0);
+  });
+
+  // Immediate optimistic UI render
+  renderBooksGrid();
+  showToast(`Moved "${book.subtitle || book.title}" to position #${newIdx + 1}`, 'success', 2000);
+
+  try {
+    const orderedBookIds = seriesBooks.map(b => b.id);
+    await apiRequest('/api/cms/books', {
+      method: 'PUT',
+      body: JSON.stringify({
+        action: 'reorder',
+        seriesId: targetSeriesId,
+        orderedBookIds,
+      }),
+    });
+  } catch (err) {
+    console.error('[CMS] Failed to persist book reordering:', err);
+    // Rollback
+    seriesBooks.forEach(b => {
+      const oldVal = prevOrderMap.get(b.id) ?? 0;
+      b.orderIndex = oldVal;
+      b.order_index = oldVal;
+      const globalB = state.books.find(x => x.id === b.id);
+      if (globalB) {
+        globalB.orderIndex = oldVal;
+        globalB.order_index = oldVal;
+      }
+    });
+    renderBooksGrid();
+    showToast('Failed to save updated book order.', 'error');
   }
 }
 
@@ -1570,13 +1692,14 @@ function openBookModal(mode = 'create', bookId = null) {
     const subEl = document.getElementById('book-modal-sub');
     if (subEl) subEl.textContent = 'Add a curriculum title to your public catalogue.';
     bookFieldPublished.checked = true;
-    bookFieldOrder.value = state.books.length + 1;
-    bookFieldImage.value = '/assets/placeholder-cover.svg';
-    updateCoverPreview('/assets/placeholder-cover.svg');
-
     if (state.activeSeriesFilter !== 'all') {
       bookFieldSeries.value = state.activeSeriesFilter;
     }
+    const currentTargetSeries = bookFieldSeries.value || 'islamic-studies';
+    const sBooks = state.books.filter(b => (b.seriesId || b.series_id) === currentTargetSeries);
+    bookFieldOrder.value = sBooks.length;
+    bookFieldImage.value = '/assets/placeholder-cover.svg';
+    updateCoverPreview('/assets/placeholder-cover.svg');
 
     bookFieldId.disabled = false;
     delete bookFieldId.dataset.dirty;
@@ -1660,6 +1783,21 @@ if (bookFieldSubtitle) {
       const titleSlug = (bookFieldTitle ? bookFieldTitle.value : '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       const subSlug = bookFieldSubtitle.value ? '-' + bookFieldSubtitle.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '';
       bookFieldId.value = `${seriesSlug}-${titleSlug}${subSlug}`.slice(0, 50);
+    }
+  });
+}
+
+if (bookFieldSeries) {
+  bookFieldSeries.addEventListener('change', () => {
+    if (bookFieldMode && bookFieldMode.value === 'create') {
+      const sBooks = state.books.filter(b => (b.seriesId || b.series_id) === bookFieldSeries.value);
+      if (bookFieldOrder) bookFieldOrder.value = sBooks.length;
+      if (!bookFieldId.dataset.dirty) {
+        const seriesSlug = bookFieldSeries.value || 'book';
+        const titleSlug = (bookFieldTitle ? bookFieldTitle.value : '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const subSlug = (bookFieldSubtitle && bookFieldSubtitle.value) ? '-' + bookFieldSubtitle.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '';
+        bookFieldId.value = `${seriesSlug}-${titleSlug}${subSlug}`.slice(0, 50);
+      }
     }
   });
 }

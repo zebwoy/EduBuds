@@ -273,17 +273,20 @@ const PRODUCTS_DATA = {
     {
       id: 'islamic-studies',
       label: 'Islamic Studies Series',
-      tagline: 'A complete curriculum — Grades 1 to 7',
+      tagline: 'A complete curriculum — Pre-Primer – Grade 8',
       description: 'A carefully structured Islamic Studies programme that grows with the learner. Each grade contains four modules, weaving belief, action, du\'as, etiquettes, history, and Qur\'anic understanding into one connected journey.',
       color: '#0878c9', colorLight: '#e7f2ff',
       books: [
-        { id: 'is-grade-1', title: 'Islamic Studies', subtitle: 'Grade 1', image: 'https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794312977873-grade-1-VCshZiwJxl7V5SVpSyxenzPug3QqNB.webp', tags: ['Grade 1', 'Curriculum'], description: 'The foundation year — introducing children to belief, practice, and the beauty of being Muslim through age-appropriate stories and activities.', whatsappMessage: 'Assalamu Alaikum! I am interested in ordering the EduBuds Islamic Studies Grade 1 book. Could you please share details on pricing, availability, and how to place an order?' },
+        { id: 'is-grade-pp1', title: 'Islamic Studies', subtitle: 'Pre-Primer 1', image: 'https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794999956899-islamic-studies-pre-primer-workbook-cover-BHhd0lsCWeFDmwPPkD14FLe3acsF2y.png', tags: ['Pre-Primer 1', 'Curriculum'], description: 'The foundation year — introducing children to belief, practice, and the beauty of being Muslim through age-appropriate stories and activities.', whatsappMessage: 'Assalamu Alaikum! I am interested in ordering the EduBuds "Islamic Studies (Pre-Primer 1)". Could you please share details on pricing, availability, and how to place an order?' },
+        { id: 'is-grade-pp2', title: 'Islamic Studies', subtitle: 'Pre-Primer 2', image: 'https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794999885973-islamic-studies-pre-primer-2-cover-qgSNd5BLdPOfe1c1qjaJoI6ABtnGNi.png', tags: ['Pre-Primer 2', 'Curriculum'], description: 'The foundation year — introducing children to belief, practice, and the beauty of being Muslim through age-appropriate stories and activities.', whatsappMessage: 'Assalamu Alaikum! I am interested in ordering the EduBuds "Islamic Studies (Pre-Primer 2)". Could you please share details on pricing, availability, and how to place an order?' },
+        { id: 'is-grade-1', title: 'Islamic Studies', subtitle: 'Grade 1', image: 'https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1795004756974-colorful-islamic-studies-grade-1-cover-CsNLBe9qyK4Z1KDaVY3tfg3V0vxNKk.png', tags: ['Grade 1', 'Curriculum'], description: 'The foundation year — introducing children to belief, practice, and the beauty of being Muslim through age-appropriate stories and activities.', whatsappMessage: 'Assalamu Alaikum! I am interested in ordering the EduBuds Islamic Studies Grade 1 book. Could you please share details on pricing, availability, and how to place an order?' },
         { id: 'is-grade-2', title: 'Islamic Studies', subtitle: 'Grade 2', image: 'https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794572000864-grade-2-aKGoXpBnF1JlkKifrpo1ZmCQd6bkuL.webp', tags: ['Grade 2', 'Curriculum'], description: 'Building on Year 1, Grade 2 deepens understanding of worship, manners, and selected du\'as with engaging lessons suited to the growing learner.', whatsappMessage: 'Assalamu Alaikum! I am interested in ordering the EduBuds Islamic Studies Grade 2 book. Could you please share details on pricing, availability, and how to place an order?' },
-        { id: 'is-grade-3', title: 'Islamic Studies', subtitle: 'Grade 3', image: 'https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794572860812-grade-3-vIJKy3xIA63qDM2NQhPKWrOvxTFLa8.webp', tags: ['Grade 3', 'Curriculum'], description: 'Grade 3 introduces richer Qur\'anic understanding, prophetic biographies, and a stronger lens on character and Islamic etiquettes.', whatsappMessage: 'Assalamu Alaikum! I am interested in ordering the EduBuds Islamic Studies Grade 3 book. Could you please share details on pricing, availability, and how to place an order?' },
+        { id: 'is-grade-3', title: 'Islamic Studies', subtitle: 'Grade 3', image: 'https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794926228090-islamic-studies-grade-3-cover-SXSDogRiLSSxHH0SFeyVtrGP43dNPB.png', tags: ['Grade 3', 'Curriculum'], description: 'Grade 3 introduces richer Qur\'anic understanding, prophetic biographies, and a stronger lens on character and Islamic etiquettes.', whatsappMessage: 'Assalamu Alaikum! I am interested in ordering the EduBuds Islamic Studies Grade 3 book. Could you please share details on pricing, availability, and how to place an order?' },
         { id: 'is-grade-4', title: 'Islamic Studies', subtitle: 'Grade 4', image: 'https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794304337935-grade-4--1--ez3x7LSxz7yymvxLTti7BJjwxlZm7E.webp', tags: ['Grade 4', 'Curriculum'], description: 'Grade 4 marks a pivotal year — students engage with deeper aspects of creed, history, and the Qur\'an, preparing them for the middle years.', whatsappMessage: 'Assalamu Alaikum! I am interested in ordering the EduBuds Islamic Studies Grade 4 book. Could you please share details on pricing, availability, and how to place an order?' },
         { id: 'is-grade-5', title: 'Islamic Studies', subtitle: 'Grade 5', image: 'https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794577012570-grade-5-dRazkrIDg6SoEgkXKnaCjnHqMOiKaA.webp', tags: ['Grade 5', 'Curriculum'], description: 'Grade 5 marks a pivotal year — students engage with deeper aspects of creed, history, and the Qur\'an, preparing them for the middle years.', whatsappMessage: 'Assalamu Alaikum! I am interested in ordering the EduBuds "Islamic Studies (Grade 5)". Could you please share details on pricing, availability, and how to place an order?' },
         { id: 'is-grade-6', title: 'Islamic Studies', subtitle: 'Grade 6', image: 'https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794656786884-grade-6-JZSN41bHdsj769qjXNBBL2QqtlGqWV.webp', tags: ['Grade 6', 'Curriculum'], description: 'Grade 6 marks a pivotal year — students engage with deeper aspects of creed, history, and the Qur\'an, preparing them for the middle years.', whatsappMessage: 'Assalamu Alaikum! I am interested in ordering the EduBuds "Islamic Studies (Grade 6)". Could you please share details on pricing, availability, and how to place an order?' },
-        { id: 'is-grade-7', title: 'Islamic Studies', subtitle: 'Grade 7', image: 'https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794656868336-grade-7-S5guNLBLNEjC1GXQlCxAWrE2oZ97GC.webp', tags: ['Grade 7', 'Curriculum'], description: 'Grade 7 marks a pivotal year — students engage with deeper aspects of creed, history, and the Qur\'an, preparing them for the middle years.', whatsappMessage: 'Assalamu Alaikum! I am interested in ordering the EduBuds "Islamic Studies (Grade 7)". Could you please share details on pricing, availability, and how to place an order?' }
+        { id: 'is-grade-7', title: 'Islamic Studies', subtitle: 'Grade 7', image: 'https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794656868336-grade-7-S5guNLBLNEjC1GXQlCxAWrE2oZ97GC.webp', tags: ['Grade 7', 'Curriculum'], description: 'Grade 7 marks a pivotal year — students engage with deeper aspects of creed, history, and the Qur\'an, preparing them for the middle years.', whatsappMessage: 'Assalamu Alaikum! I am interested in ordering the EduBuds "Islamic Studies (Grade 7)". Could you please share details on pricing, availability, and how to place an order?' },
+        { id: 'is-grade-8', title: 'Islamic Studies', subtitle: 'Grade 8', image: 'https://mg57l9mdmzsnv8rl.public.blob.vercel-storage.com/edubuds-1794925124848-edubuds-islamic-studies-grade-3-cover-zw6XdelohKoTceHNZsIC7MUJVVtt5N.png', tags: ['Grade 8', 'Curriculum'], description: 'Grade 8 marks a pivotal year — students engage with deeper aspects of creed, history, and the Qur\'an, preparing them for the middle years.', whatsappMessage: 'Assalamu Alaikum! I am interested in ordering the EduBuds "Islamic Studies (Grade 8)". Could you please share details on pricing, availability, and how to place an order?' }
       ]
     },
     {
@@ -344,7 +347,7 @@ const PRODUCTS_DATA = {
         const gInfo = extractGradeInfo(series);
         window.__edubudsGradeInfo = gInfo;
         if (gInfo.islamicSeries) {
-          gInfo.islamicSeries.tagline = `A complete curriculum — Grades ${gInfo.minGrade} to ${gInfo.maxGrade}`;
+          gInfo.islamicSeries.tagline = `A complete curriculum — ${gInfo.rangeLabel}`;
         }
         renderTabs();
         renderGrid();
@@ -758,13 +761,17 @@ function extractGradeInfo(seriesData) {
   if (!seriesData || !Array.isArray(seriesData)) {
     return {
       minGrade: 1,
-      maxGrade: 7,
-      gradeCount: 7,
-      gradeCountWord: 'seven',
-      rangeLabel: 'Grades 1–7',
-      rangeText: 'Grade 1 to Grade 7',
-      rangeThrough: 'Grade 1 through Grade 7',
+      maxGrade: 8,
+      gradeCount: 10,
+      gradeCountWord: 'ten',
+      hasPrePrimer: true,
+      prePrimerCount: 2,
+      rangeLabel: 'Pre-Primer – Grade 8',
+      rangeText: 'Pre-Primer to Grade 8',
+      rangeThrough: 'Pre-Primer through Grade 8',
+      statsLabel: 'Learning + Grade Levels',
       islamicSeries: null,
+      orderedBooks: [],
     };
   }
 
@@ -772,33 +779,52 @@ function extractGradeInfo(seriesData) {
     seriesData.find(s => /islamic\s*studies/i.test(s.label || '')) ||
     seriesData[0];
 
-  const gradeBooks = (islamicSeries && Array.isArray(islamicSeries.books)) ? islamicSeries.books : [];
+  const rawBooks = (islamicSeries && Array.isArray(islamicSeries.books)) ? islamicSeries.books : [];
+  const gradeBooks = [...rawBooks].sort((a, b) => {
+    const idxA = a.order_index ?? a.orderIndex ?? 0;
+    const idxB = b.order_index ?? b.orderIndex ?? 0;
+    return idxA - idxB;
+  });
 
-  const gradeNumbers = gradeBooks.map(b => {
-    const m = (b.subtitle || b.title || b.id || '').match(/grade[-_\s]*(\d+)/i);
-    return m ? parseInt(m[1], 10) : null;
-  }).filter(n => n !== null);
+  const gradeNumbers = [];
+  let prePrimerCount = 0;
 
+  gradeBooks.forEach(b => {
+    const str = `${b.subtitle || ''} ${b.title || ''} ${b.id || ''}`;
+    if (/pre[-_\s]*primer/i.test(str)) {
+      prePrimerCount++;
+    } else {
+      const m = str.match(/grade[-_\s]*(\d+)/i);
+      if (m) gradeNumbers.push(parseInt(m[1], 10));
+    }
+  });
+
+  const hasPrePrimer = prePrimerCount > 0;
   const minGrade = gradeNumbers.length > 0 ? Math.min(...gradeNumbers) : 1;
-  const maxGrade = gradeNumbers.length > 0 ? Math.max(...gradeNumbers) : (gradeBooks.length || 7);
-  const gradeCount = gradeBooks.length || (maxGrade - minGrade + 1);
+  const maxGrade = gradeNumbers.length > 0 ? Math.max(...gradeNumbers) : (gradeBooks.length || 8);
+  const gradeCount = gradeBooks.length || (hasPrePrimer ? prePrimerCount + maxGrade : (maxGrade - minGrade + 1));
 
-  const numWords = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+  const numWords = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen'];
   const gradeCountWord = numWords[gradeCount] || String(gradeCount);
 
-  const rangeLabel = `Grades ${minGrade}–${maxGrade}`;
-  const rangeText = `Grade ${minGrade} to Grade ${maxGrade}`;
-  const rangeThrough = `Grade ${minGrade} through Grade ${maxGrade}`;
+  const rangeLabel = hasPrePrimer ? `Pre-Primer – Grade ${maxGrade}` : `Grades ${minGrade}–${maxGrade}`;
+  const rangeText = hasPrePrimer ? `Pre-Primer to Grade ${maxGrade}` : `Grade ${minGrade} to Grade ${maxGrade}`;
+  const rangeThrough = hasPrePrimer ? `Pre-Primer through Grade ${maxGrade}` : `Grade ${minGrade} through Grade ${maxGrade}`;
+  const statsLabel = 'Learning + Grade Levels';
 
   return {
     minGrade,
     maxGrade,
     gradeCount,
     gradeCountWord,
+    hasPrePrimer,
+    prePrimerCount,
     rangeLabel,
     rangeText,
     rangeThrough,
+    statsLabel,
     islamicSeries,
+    orderedBooks: gradeBooks,
   };
 }
 
@@ -807,7 +833,7 @@ window.__edubudsGradeInfo = extractGradeInfo(PRODUCTS_DATA.series);
 
 function applyDynamicGradesToDOM(info) {
   if (!info) return;
-  const { minGrade, maxGrade, gradeCount, gradeCountWord, rangeLabel, rangeText, rangeThrough, islamicSeries } = info;
+  const { minGrade, maxGrade, gradeCount, gradeCountWord, hasPrePrimer, prePrimerCount, rangeLabel, rangeText, rangeThrough, statsLabel, islamicSeries, orderedBooks } = info;
 
   // 1. Stats bar: grade levels counter
   const statItems = document.querySelectorAll('.stats-bar .stat-item');
@@ -817,13 +843,13 @@ function applyDynamicGradesToDOM(info) {
     if (numEl) {
       setStatCounterValue(numEl, gradeCount);
     }
-    if (labEl) labEl.textContent = 'Grade levels';
+    if (labEl) labEl.textContent = statsLabel;
   }
 
   // 2. Hero Trust Pills
   const trustPills = document.querySelectorAll('.hero-trust .trust-pill');
   trustPills.forEach(pill => {
-    if (/GRADES/i.test(pill.textContent)) {
+    if (/GRADES|PRE-PRIMER|LEVELS/i.test(pill.textContent)) {
       const dot = pill.querySelector('.dot');
       pill.textContent = '';
       if (dot) pill.appendChild(dot);
@@ -835,47 +861,91 @@ function applyDynamicGradesToDOM(info) {
   const track = document.querySelector('.topline-track');
   if (track) {
     track.querySelectorAll('.topline-item').forEach(item => {
-      item.innerHTML = item.innerHTML.replace(/Grades?\s*1\s*(–|-|to)\s*\d+/gi, rangeLabel);
+      item.innerHTML = item.innerHTML
+        .replace(/(?:Grades?\s*\d+\s*(?:–|-|to)\s*\d+|Pre-Primer\s*(?:–|-|to)\s*Grade\s*\d+)/gi, rangeLabel);
     });
   }
 
   // 4. Hero Lead Description
   const heroDesc = document.querySelector('.hero-copy p');
   if (heroDesc) {
-    heroDesc.innerHTML = heroDesc.innerHTML
-      .replace(/Grade\s*1\s+all\s+the\s+way\s+to\s+Grade\s*\d+/gi, `Grade ${minGrade} all the way to Grade ${maxGrade}`)
-      .replace(/Grades?\s*1\s*(–|-|to)\s*\d+/gi, rangeLabel);
+    if (hasPrePrimer) {
+      heroDesc.innerHTML = heroDesc.innerHTML
+        .replace(/(?:Grade\s*1|from\s+Grade\s*\d+|from\s+Pre-Primer)\s+all\s+the\s+way\s+to\s+Grade\s*\d+/gi, `from Pre-Primer all the way to Grade ${maxGrade}`)
+        .replace(/(?:Grades?\s*\d+\s*(?:–|-|to)\s*\d+|Pre-Primer\s*(?:–|-|to)\s*Grade\s*\d+)/gi, rangeLabel);
+    } else {
+      heroDesc.innerHTML = heroDesc.innerHTML
+        .replace(/(?:Grade\s*1|from\s+Grade\s*\d+)\s+all\s+the\s+way\s+to\s+Grade\s*\d+/gi, `from Grade ${minGrade} all the way to Grade ${maxGrade}`)
+        .replace(/Grades?\s*\d+\s*(?:–|-|to)\s*\d+/gi, rangeLabel);
+    }
   }
 
   // 5. Curriculum Section Lead & Journey Headline
   const curLead = document.querySelector('#curriculum .section-head > p');
   if (curLead) {
+    const levelDescriptor = hasPrePrimer ? `${gradeCountWord} learning levels` : `${gradeCountWord} grades`;
     curLead.innerHTML = curLead.innerHTML
-      .replace(/Across\s+all\s+(?:nine|\d+)\s+grades/gi, `Across all ${gradeCountWord} grades`)
-      .replace(/Across\s+all\s+\w+\s+grades/gi, `Across all ${gradeCountWord} grades`);
+      .replace(/Across\s+all\s+(?:nine|seven|eight|ten|\d+)\s+(?:grades|learning levels)/gi, `Across all ${levelDescriptor}`)
+      .replace(/Across\s+all\s+\w+\s+(?:grades|learning levels)/gi, `Across all ${levelDescriptor}`);
   }
 
   const journeyHead = document.querySelector('.grade-journey-copy h3');
   if (journeyHead) {
-    journeyHead.textContent = `From Grade ${minGrade} to Grade ${maxGrade}.`;
+    journeyHead.textContent = `From ${rangeText}.`;
   }
 
   // 6. Grade Journey Orbs
   const orbsContainer = document.querySelector('.grade-orbs');
   if (orbsContainer) {
-    orbsContainer.setAttribute('aria-label', `Grade levels ${minGrade} to ${maxGrade}`);
+    orbsContainer.setAttribute('aria-label', `Learning levels: ${rangeLabel}`);
     orbsContainer.innerHTML = '';
-    for (let g = minGrade; g <= maxGrade; g++) {
-      const orb = document.createElement('span');
-      orb.className = 'grade-orb';
-      orb.textContent = g;
-      orbsContainer.appendChild(orb);
+
+    if (orderedBooks && orderedBooks.length > 0) {
+      orderedBooks.forEach(b => {
+        const str = `${b.subtitle || ''} ${b.title || ''} ${b.id || ''}`;
+        const orb = document.createElement('span');
+        orb.className = 'grade-orb';
+
+        const ppMatch = str.match(/pre[-_\s]*primer\s*(\d*)/i);
+        const grMatch = str.match(/grade[-_\s]*(\d+)/i);
+
+        if (ppMatch) {
+          const num = ppMatch[1] || '';
+          orb.textContent = `PP${num}`;
+          orb.classList.add('grade-orb-foundation');
+          orb.title = b.subtitle || `Pre-Primer ${num}`.trim();
+        } else if (grMatch) {
+          orb.textContent = grMatch[1];
+          orb.title = b.subtitle || `Grade ${grMatch[1]}`;
+        } else {
+          orb.textContent = b.subtitle || b.title;
+          orb.title = b.title;
+        }
+        orbsContainer.appendChild(orb);
+      });
+    } else {
+      if (hasPrePrimer) {
+        for (let p = 1; p <= (prePrimerCount || 2); p++) {
+          const orb = document.createElement('span');
+          orb.className = 'grade-orb grade-orb-foundation';
+          orb.textContent = `PP${p}`;
+          orb.title = `Pre-Primer ${p}`;
+          orbsContainer.appendChild(orb);
+        }
+      }
+      for (let g = minGrade; g <= maxGrade; g++) {
+        const orb = document.createElement('span');
+        orb.className = 'grade-orb';
+        orb.textContent = g;
+        orb.title = `Grade ${g}`;
+        orbsContainer.appendChild(orb);
+      }
     }
   }
 
   // 7. Books Section Tagline (when Islamic Studies is selected or loaded)
   if (islamicSeries) {
-    islamicSeries.tagline = `A complete curriculum — Grades ${minGrade} to ${maxGrade}`;
+    islamicSeries.tagline = `A complete curriculum — ${rangeLabel}`;
     const descEl = document.getElementById('series-label-desc');
     const textEl = document.getElementById('series-label-text');
     if (descEl && textEl && /islamic/i.test(textEl.textContent)) {
@@ -890,25 +960,25 @@ function applyDynamicGradesToDOM(info) {
   }
   const pathwaySteps = document.querySelectorAll('.pathway-step .step-desc');
   pathwaySteps.forEach(p => {
-    p.innerHTML = p.innerHTML.replace(/across\s+(?:nine|\d+)\s+grades/gi, `across ${gradeCountWord} grades`);
+    const levelDescriptor = hasPrePrimer ? `${gradeCountWord} learning levels` : `${gradeCountWord} grades`;
+    p.innerHTML = p.innerHTML
+      .replace(/across\s+(?:nine|seven|eight|ten|\d+)\s+(?:grades|learning levels)/gi, `across ${levelDescriptor}`)
+      .replace(/across\s+\w+\s+(?:grades|learning levels)/gi, `across ${levelDescriptor}`);
   });
 
   // 9. Parents & Educators Section Card 01
   const parentCards = document.querySelectorAll('.parent-cards .parent-card p');
   parentCards.forEach(p => {
-    p.innerHTML = p.innerHTML.replace(
-      /Grade\s*1\s+through\s+Grade\s*\d+/gi,
-      `Grade ${minGrade} through Grade ${maxGrade}`
-    ).replace(/Grades?\s*1\s*(–|-|to)\s*\d+/gi, rangeLabel);
+    p.innerHTML = p.innerHTML
+      .replace(/(?:Grade\s*1|from\s+Grade\s*\d+|Pre-Primer)\s+through\s+Grade\s*\d+/gi, rangeThrough)
+      .replace(/(?:Grades?\s*\d+\s*(?:–|-|to)\s*\d+|Pre-Primer\s*(?:–|-|to)\s*Grade\s*\d+)/gi, rangeLabel);
   });
 
   // 10. Footer Tagline
   const footerTagline = document.querySelector('.footer-tagline');
   if (footerTagline) {
-    footerTagline.innerHTML = footerTagline.innerHTML.replace(
-      /Grades?\s*1\s+to\s+\d+/gi,
-      `Grades ${minGrade} to ${maxGrade}`
-    ).replace(/Grades?\s*1\s*(–|-)\s*\d+/gi, rangeLabel);
+    footerTagline.innerHTML = footerTagline.innerHTML
+      .replace(/(?:Grades?\s*\d+\s*(?:–|-|to)\s*\d+|Pre-Primer\s*(?:–|-|to)\s*Grade\s*\d+)/gi, rangeLabel);
   }
 }
 
@@ -929,7 +999,7 @@ function updatePageFromSeries(seriesData) {
   const gradeInfo = extractGradeInfo(seriesData);
   window.__edubudsGradeInfo = gradeInfo;
 
-  /* 1 — Stats bar: update "Grade levels" and "Book series" count ---- */
+  /* 1 — Stats bar: update "Learning + Grade Levels" and "Book series" count ---- */
   const statItems = $$('.stats-bar .stat-item');
   if (statItems[0]) {
     const numEl = statItems[0].querySelector('.stat-num');
@@ -937,7 +1007,7 @@ function updatePageFromSeries(seriesData) {
     if (numEl) {
       setStatCounterValue(numEl, gradeInfo.gradeCount);
     }
-    if (labEl) labEl.textContent = 'Grade levels';
+    if (labEl) labEl.textContent = gradeInfo.statsLabel;
   }
   if (statItems[1]) {
     const numEl = statItems[1].querySelector('.stat-num');
@@ -957,7 +1027,7 @@ function updatePageFromSeries(seriesData) {
       pill.textContent = '';
       if (dot) pill.appendChild(dot);
       pill.append(' ' + totalSeries + ' SERIES');
-    } else if (/GRADES/i.test(text)) {
+    } else if (/GRADES|PRE-PRIMER|LEVELS/i.test(text)) {
       const dot = pill.querySelector('.dot');
       pill.textContent = '';
       if (dot) pill.appendChild(dot);
@@ -1003,8 +1073,8 @@ function renderHeroFloatCards(seriesData) {
   function cleanSub(s) {
     if (s.id === 'islamic-studies' || /islamic\s*studies/i.test(s.label || '')) {
       const gInfo = window.__edubudsGradeInfo || extractGradeInfo(seriesData);
-      const bCount = (s.books && s.books.length > 0) ? (s.books.length === 1 ? '1 book' : `${s.books.length} books`) : '7 books';
-      const rLabel = gInfo ? gInfo.rangeLabel : 'Grades 1–7';
+      const bCount = (s.books && s.books.length > 0) ? (s.books.length === 1 ? '1 book' : `${s.books.length} books`) : `${gInfo ? gInfo.gradeCount : 10} books`;
+      const rLabel = gInfo ? gInfo.rangeLabel : 'Pre-Primer – Grade 8';
       return `${rLabel} · ${bCount}`;
     }
     if (s.books && s.books.length > 0) {
