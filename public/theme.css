@@ -151,6 +151,28 @@ html * {
      specificity or by being declared later. */
 }
 
+/* ── Dynamic Curve Swipe Transition Overlay (GSAP MorphSVG) ── */
+.theme-curve-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 999999;
+  display: none;
+  will-change: transform;
+}
+
+.theme-curve-overlay.is-active {
+  display: block;
+}
+
+/* When the fluid curve covers the screen, instant paint swap prevents any internal stagger */
+html.theme-instant,
+html.theme-instant * {
+  transition: none !important;
+}
+
 body {
   background: var(--bg);
   color: var(--ink);

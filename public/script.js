@@ -68,23 +68,92 @@ function buildWhatsAppURL(message) {
 /* ── Year ────────────────────────────────────────────────── */
 const yearEl = $('#year');
 if (yearEl) yearEl.textContent = new Date().getFullYear();
-/* ── Theme Toggle ────────────────────────────────────────── */
+/* ── Theme Toggle (GSAP MorphSVG Curve Swipe Transition) ── */
 (function initTheme() {
   const html = document.documentElement;
   const toggle = $('#theme-toggle');
   const STORAGE = 'edubuds-theme';
 
-  const saved = localStorage.getItem(STORAGE);
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const initial = saved || (prefersDark ? 'dark' : 'light');
+  const overlay = document.getElementById('theme-curve-overlay');
+  const path = document.getElementById('theme-curve-path');
+  let isTransitioning = false;
 
-  html.dataset.theme = initial;
+  // Fluid wave Bézier shapes across 100x100 viewBox
+  const pathStart    = 'M 0 0 L 100 0 L 100 0 Q 50 0 0 0 Z';
+  const pathMidEnter = 'M 0 0 L 100 0 L 100 65 Q 50 115 0 65 Z';
+  const pathFull     = 'M 0 0 L 100 0 L 100 100 Q 50 100 0 100 Z';
+  const pathMidExit  = 'M 0 65 Q 50 115 100 65 L 100 100 Q 50 100 0 100 Z';
+  const pathEnd      = 'M 0 100 Q 50 100 100 100 L 100 100 Q 50 100 0 100 Z';
 
-  toggle && toggle.addEventListener('click', () => {
-    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  function applyInstantTheme(next) {
+    html.classList.add('theme-instant');
     html.dataset.theme = next;
     localStorage.setItem(STORAGE, next);
-  });
+    void html.offsetHeight; // force reflow so tokens resolve instantly
+    html.classList.remove('theme-instant');
+  }
+
+  function handleThemeToggle() {
+    if (isTransitioning) return;
+
+    const current = html.dataset.theme || 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+
+    // Fallback: If prefers-reduced-motion, or GSAP/MorphSVG not yet loaded, toggle immediately
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion || !window.gsap || !window.MorphSVGPlugin || !overlay || !path) {
+      applyInstantTheme(next);
+      return;
+    }
+
+    isTransitioning = true;
+    window.gsap.registerPlugin(window.MorphSVGPlugin);
+
+    // Target theme's background color (matches the user's specification)
+    const targetBg = next === 'dark' ? '#0d1b2e' : '#fffdf7';
+
+    overlay.classList.add('is-active');
+
+    const tl = window.gsap.timeline({
+      onComplete: () => {
+        overlay.classList.remove('is-active');
+        window.gsap.set(path, { attr: { d: pathStart } });
+        isTransitioning = false;
+      }
+    });
+
+    tl.set(path, { attr: { d: pathStart, fill: targetBg } })
+      // Phase 1: Wave swells downward into a deep fluid curve
+      .to(path, {
+        duration: 0.26,
+        ease: 'power2.in',
+        morphSVG: pathMidEnter
+      })
+      // Phase 2: Fills the entire screen
+      .to(path, {
+        duration: 0.18,
+        ease: 'power1.out',
+        morphSVG: pathFull
+      })
+      // Exact Apex: Swap theme instantly under the fluid curtain
+      .add(() => {
+        applyInstantTheme(next);
+      })
+      // Phase 3: Wave uncovers downward from the top
+      .to(path, {
+        duration: 0.26,
+        ease: 'power2.in',
+        morphSVG: pathMidExit
+      })
+      // Phase 4: Collapses smoothly at bottom
+      .to(path, {
+        duration: 0.18,
+        ease: 'power1.out',
+        morphSVG: pathEnd
+      });
+  }
+
+  toggle && toggle.addEventListener('click', handleThemeToggle);
 })();
 
 /* ── Mobile Menu ─────────────────────────────────────────── */

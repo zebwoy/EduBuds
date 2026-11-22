@@ -688,8 +688,15 @@
     </div>
   </footer>
 
+  <script src="/vendor/gsap.min.js" defer></script>
+  <script src="/vendor/MorphSVGPlugin.min.js" defer></script>
   <script src="/faq.js" defer></script>
-  <script src="/script.js?v=2.6"></script>
+  <script src="/script.js?v=2.6" defer></script>
+
+  <!-- ── Dynamic Curve Swipe Transition Overlay (GSAP MorphSVG) ── -->
+  <svg id="theme-curve-overlay" class="theme-curve-overlay" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <path id="theme-curve-path" d="M 0 0 L 100 0 L 100 0 Q 50 0 0 0 Z"></path>
+  </svg>
 </body>
 
 </html>
