@@ -131,6 +131,24 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 116px;
   -webkit-text-size-adjust: 100%;
+  /* Theme transition: applied only on <html> so every element that uses a
+     CSS variable inherits the crossfade without individual transition rules.
+     Avoids the "flash of wrong theme" on page load because the attribute is
+     set synchronously in a <script> in <head> before paint. */
+  transition: color 0.4s var(--ease-smooth);
+}
+
+/* Token layer: colour-producing custom properties live on :root / [data-theme].
+   We only transition properties that are directly used as paint values so the
+   browser can GPU-composite the crossfade cleanly. */
+html,
+html * {
+  transition-property: background-color, border-color, color, box-shadow, fill, stroke;
+  transition-duration: 0.35s;
+  transition-timing-function: var(--ease-smooth);
+  /* Allow individual components to override with their own interaction
+     transitions (hover, focus) without fighting this rule — they win via
+     specificity or by being declared later. */
 }
 
 body {
@@ -141,7 +159,7 @@ body {
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background 0.4s var(--ease-smooth), color 0.4s var(--ease-smooth);
+  /* background-color / color handled by global html * transition rule */
   overflow-x: hidden;
 }
 
@@ -162,7 +180,7 @@ ul { list-style: none; }
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.1em;
-  transition: background 0.4s, color 0.4s;
+  transition: background-color 0.35s var(--ease-smooth), color 0.35s var(--ease-smooth);
 }
 
 .topline-track {
@@ -209,7 +227,7 @@ ul { list-style: none; }
   position: sticky;
   top: 0;
   z-index: 100;
-  transition: background 0.4s, border-color 0.4s, box-shadow 0.3s;
+  transition: box-shadow 0.3s; /* background-color / border-color via global rule */
 }
 
 .header.scrolled {
@@ -826,7 +844,7 @@ em { font-style: normal; color: var(--green); }
   background: var(--surface);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  transition: background 0.4s;
+  /* background-color handled by global html * transition rule */
 }
 
 .stat-item {
