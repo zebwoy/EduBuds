@@ -1,0 +1,15 @@
+# EduBuds — robots.txt
+# https://www.edubuds.in/
+
+User-agent: *
+Allow: /
+
+# Keep admin panel private from crawlers
+Disallow: /admin/
+Disallow: /admin
+
+# Keep internal API routes private
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://www.edubuds.in/sitemap.xml
