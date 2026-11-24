@@ -13,3 +13,4 @@ Disallow: /api/
 
 # Sitemap location
 Sitemap: https://www.edubuds.in/sitemap.xml
+
